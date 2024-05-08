@@ -36,13 +36,16 @@ let useCountriesQuery = (): countriesQuery => {
         Js.Promise.resolve({countryList, countryValueMap, countryTrie});
       },
     });
-
-  if (isPending) {
-    Pending;
-  } else {
-    switch (error |> Js.Nullable.toOption) {
-    | Some(queryError) => Failed(queryError)
-    | None => Finished(data |> Js.Nullable.toOption |> Option.get)
-    };
-  };
+  React.useMemo3(
+    () =>
+      if (isPending) {
+        Pending;
+      } else {
+        switch (error |> Js.Nullable.toOption) {
+        | Some(queryError) => Failed(queryError)
+        | None => Finished(data |> Js.Nullable.toOption |> Option.get)
+        };
+      },
+    (isPending, error, data),
+  );
 };
