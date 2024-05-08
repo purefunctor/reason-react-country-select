@@ -1,6 +1,22 @@
 open Models;
 
-let doNothing = _ => ();
+type state = {
+  buttonText: string,
+  isToggled: bool,
+};
+
+type action =
+  | SelectCountry(Country.t)
+  | ToggleDropdown;
+
+let reducer = (state: state, action: action) => {
+  switch (action) {
+  | SelectCountry(country) => {buttonText: country.label, isToggled: false}
+  | ToggleDropdown => {...state, isToggled: !state.isToggled}
+  };
+};
+
+let defaultState = {buttonText: "Select a Country", isToggled: false};
 
 [@react.component]
 let make =
@@ -9,23 +25,22 @@ let make =
       ~country as _: option(string),
       ~onChange: option(string => unit)=?,
     ) => {
-  let (buttonText, setButtonText) = React.useState(() => "United States");
-  let (isOpen, setIsOpen) = React.useState(() => true);
+  let ({buttonText, isToggled}, dispatch) =
+    React.useReducer(reducer, defaultState);
 
-  let buttonToggle = _ => {
-    setIsOpen(prevIsOpen => !prevIsOpen);
+  let onClick = _ => {
+    dispatch(ToggleDropdown);
   };
 
-  let onChange = onChange |> Option.value(~default=doNothing);
+  let onChange = Option.value(onChange, ~default=_ => ());
 
   let onSelect = (country: Country.t) => {
-    setIsOpen(_ => false);
-    setButtonText(_ => country.label);
+    dispatch(SelectCountry(country));
     onChange(country.label);
   };
 
   <div ?className>
-    <button onClick=buttonToggle> {React.string(buttonText)} </button>
-    {isOpen ? <CountrySelectSearch onSelect /> : React.null}
+    <button onClick> {React.string(buttonText)} </button>
+    {isToggled ? <CountrySelectSearch onSelect /> : React.null}
   </div>;
 };
