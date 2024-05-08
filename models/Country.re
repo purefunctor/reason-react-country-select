@@ -44,3 +44,21 @@ let buildIndexTrie = (countries: array(t)): Search.Trie.t(int) => {
      });
   trie;
 };
+
+let searchCountries =
+    (
+      ~searchField: string,
+      ~countriesList: array(t),
+      ~countriesTrie: Search.Trie.t(int),
+    )
+    : array(t) => {
+  let searchField = searchField |> Js.String.toLowerCase;
+  let countryIndices = Search.Trie.searchPartial(countriesTrie, searchField);
+  let countries = [||];
+  countryIndices
+  |> Array.iter(countryIndex => {
+       let value = countriesList[countryIndex];
+       ignore(Js.Array.push(~value, countries));
+     });
+  countries;
+};
