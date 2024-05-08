@@ -1,0 +1,18 @@
+{
+  "scripts": {
+    "dev:reason": "dune build -w",
+    "dev:vite": "vite dev --host",
+    "dev": "concurrently pnpm:dev:reason pnpm:dev:vite"
+  },
+  "type": "module",
+  "private": "true",
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "concurrently": "^8.2.2",
+    "vite": "^5.2.11"
+  }
+}
