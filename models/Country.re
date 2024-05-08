@@ -15,23 +15,32 @@ let fromJsonOpt = (json: Js.Json.t): option(t) => {
   Some({value, label});
 };
 
-let exampleCountries = [|
-  {label: "Japan", value: "jp"},
-  {label: "Philippines", value: "ph"},
-  {label: "Singapore", value: "sg"},
-  {label: "Taiwan", value: "tw"},
-  {label: "United Kingdom", value: "uk"},
-  {label: "United States", value: "us"},
-|];
+let fromJson = (json: Js.Json.t): t => {
+  let country = Obj.magic(json);
+  let value = country##value;
+  let label = country##label;
+  {value, label};
+};
 
-let exampleCountriesTrie = {
-  open Search;
+let manyFromJson = (json: Js.Json.t): array(t) => {
+  let countries = Obj.magic(json);
+  Array.map(fromJson, countries);
+};
 
-  let trie = Trie.create();
-  exampleCountries
+let buildValueMap = (countries: array(t)): Js.Dict.t(int) => {
+  let map = Js.Dict.empty();
+  countries
   |> Array.iteri((index, country) => {
-       Trie.insert(trie, country.label, index)
+       Js.Dict.set(map, country.value, index)
      });
+  map;
+};
 
+let buildIndexTrie = (countries: array(t)): Search.Trie.t(int) => {
+  let trie = Search.Trie.create();
+  countries
+  |> Array.iteri((index, country) => {
+       Search.Trie.insert(trie, country.label, index)
+     });
   trie;
 };
