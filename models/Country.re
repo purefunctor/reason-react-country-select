@@ -48,16 +48,16 @@ let buildIndexTrie = (countries: array(t)): Search.Trie.t(int) => {
 let searchCountries =
     (
       ~searchField: string,
-      ~countriesList: array(t),
-      ~countriesTrie: Search.Trie.t(int),
+      ~countryList: array(t),
+      ~countryTrie: Search.Trie.t(int),
     )
     : array(t) => {
   let searchField = searchField |> Js.String.toLowerCase;
-  let countryIndices = Search.Trie.searchPartial(countriesTrie, searchField);
+  let countryIndices = Search.Trie.searchPartial(countryTrie, searchField);
   let countries = [||];
   countryIndices
   |> Array.iter(countryIndex => {
-       let value = countriesList[countryIndex];
+       let value = countryList[countryIndex];
        ignore(Js.Array.push(~value, countries));
      });
   countries;
