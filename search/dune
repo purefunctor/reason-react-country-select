@@ -1,0 +1,7 @@
+(library
+ (name search)
+ (public_name country_select.search)
+ (libraries melange.js)
+ (modes melange)
+ (preprocess
+  (pps melange.ppx)))
