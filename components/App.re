@@ -1,4 +1,8 @@
 [@react.component]
 let make = () => {
-  <div> {React.string("Hello, World!")} </div>;
+  <CountrySelect
+    className="custom-class"
+    country={Some("us")}
+    onChange={country => Js.Console.log(country)}
+  />;
 };

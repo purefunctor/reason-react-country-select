@@ -1,6 +1,6 @@
 (library
  (name components)
- (libraries reason-react)
+ (libraries melange.belt models reason-react)
  (modes melange)
  (preprocess
   (pps melange.ppx reason-react-ppx)))
