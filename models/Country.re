@@ -20,5 +20,18 @@ let exampleCountries = [|
   {label: "Philippines", value: "ph"},
   {label: "Singapore", value: "sg"},
   {label: "Taiwan", value: "tw"},
+  {label: "United Kingdom", value: "uk"},
   {label: "United States", value: "us"},
 |];
+
+let exampleCountriesTrie = {
+  open Search;
+
+  let trie = Trie.create();
+  exampleCountries
+  |> Array.iteri((index, country) => {
+       Trie.insert(trie, country.label, index)
+     });
+
+  trie;
+};
