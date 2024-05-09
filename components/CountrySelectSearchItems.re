@@ -58,7 +58,7 @@ let reducer = (state: state, action: action) => {
 };
 
 [@react.component]
-let make = (~searchField, ~onSelect, ~countryData) => {
+let make = (~index as _, ~search, ~onSelect, ~countryData) => {
   let CountryApi.{countryList, countryTrie, _} = countryData;
 
   let ({currentIndex: _, currentCountries}, dispatch) =
@@ -68,12 +68,11 @@ let make = (~searchField, ~onSelect, ~countryData) => {
     );
 
   // Update currentCountries only when the searchField is changed.
-  let (prevSearchField, setPrevSearchField) =
-    React.useState(() => searchField);
-  if (searchField !== prevSearchField) {
-    setPrevSearchField(_ => searchField);
+  let (prevSearch, setPrevSearch) = React.useState(() => search);
+  if (search !== prevSearch) {
+    setPrevSearch(_ => search);
     let countryList =
-      Country.searchCountries(~searchField, ~countryList, ~countryTrie);
+      Country.searchCountries(~search, ~countryList, ~countryTrie);
     dispatch(SetCountries(countryList));
   };
 

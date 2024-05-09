@@ -30,7 +30,7 @@ let getInitialCountry =
     | None =>
       let countries =
         Country.searchCountries(
-          ~searchField=initialCountry,
+          ~search=initialCountry,
           ~countryList,
           ~countryTrie,
         );
