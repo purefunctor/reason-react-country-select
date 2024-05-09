@@ -1,64 +1,13 @@
 open React.Event;
 
-type state = {
-  index: int,
-  search: string,
-};
-
-type action =
-  | GoUp
-  | GoDown
-  | Search(string);
-
-let reducer = (state: state, action: action) => {
-  switch (action) {
-  | GoUp => {...state, index: state.index - 1}
-  | GoDown => {...state, index: state.index + 1}
-  | Search(search) => {index: 0, search}
-  };
-};
-
-let useInputRef = (onExit, dispatch) => {
-  let inputRef = React.useRef(Js.Nullable.null);
-  let onKeyDown =
-    React.useCallback0((event: KeyboardFFI.event) => {
-      switch (event.key) {
-      | "Escape" => onExit()
-      | "ArrowUp" => dispatch(GoUp)
-      | "ArrowDown" => dispatch(GoDown)
-      | _ => ()
-      }
-    });
-  React.useEffect1(
-    () => {
-      switch (inputRef.current |> Js.Nullable.toOption) {
-      | None => None
-      | Some(inputElement) =>
-        KeyboardFFI.addEventListener(inputElement, "keydown", onKeyDown);
-        Some(
-          () =>
-            KeyboardFFI.removeEventListener(
-              inputElement,
-              "keydown",
-              onKeyDown,
-            ),
-        );
-      }
-    },
-    [|inputRef|],
-  );
-  inputRef;
-};
-
 [@react.component]
 let make = (~onExit, ~onSelect) => {
   let countriesQuery = CountryApi.useCountriesQuery();
-  let ({index, search}, dispatch) =
-    React.useReducer(reducer, {index: 0, search: ""});
-  let inputRef = useInputRef(onExit, dispatch);
+  let (search, setSearch) = React.useState(() => "");
 
+  let inputRef = React.useRef(Js.Nullable.null);
   let onChange = event => {
-    dispatch(Search(Form.target(event)##value));
+    setSearch(_ => Form.target(event)##value);
   };
 
   <div>
@@ -72,7 +21,7 @@ let make = (~onExit, ~onSelect) => {
      | Pending => <div> {React.string("Loading countries...")} </div>
      | Failed(_) => <div> {React.string("Could not load countries!")} </div>
      | Finished(countryData) =>
-       <CountrySelectSearchItems index search onSelect countryData />
+       <CountrySelectSearchItems inputRef search countryData onExit onSelect />
      }}
   </div>;
 };

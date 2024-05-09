@@ -8,18 +8,87 @@ module Item = {
   };
 };
 
+type state = {
+  index: int,
+  countries: array(Country.t),
+};
+
+type action =
+  | GoUp
+  | GoDown
+  | SetCountries(array(Country.t));
+
+let reducer = (state: state, action: action) =>
+  switch (action) {
+  | GoUp =>
+    let minimum = 0;
+    {...state, index: Js.Math.max_int(minimum, state.index - 1)};
+  | GoDown =>
+    let maximum = Js.Array.length(state.countries) - 1;
+    {...state, index: Js.Math.min_int(state.index + 1, maximum)};
+  | SetCountries(countries) =>
+    let index = 0;
+    {index, countries};
+  };
+
+let useKeyboardBindings =
+    (
+      ~onUp,
+      ~onDown,
+      ~onEsc,
+      ~onEnter,
+      inputRef: React.ref(Js.Nullable.t(Dom.element)),
+    ) => {
+  let onKeyDown = (event: KeyboardFFI.event) => {
+    switch (event.key) {
+    | "ArrowUp" => onUp()
+    | "ArrowDown" => onDown()
+    | "Escape" => onEsc()
+    | "Enter" => onEnter()
+    | _ => ()
+    };
+  };
+  React.useEffect2(
+    () => {
+      switch (inputRef.current |> Js.toOption) {
+      | None => None
+      | Some(element) =>
+        open KeyboardFFI;
+        addEventListener(element, "keydown", onKeyDown);
+        Some(() => removeEventListener(element, "keydown", onKeyDown));
+      }
+    },
+    (inputRef, onKeyDown),
+  );
+};
+
 [@react.component]
-let make = (~index as _, ~search, ~onSelect, ~countryData) => {
+let make =
+    (
+      ~inputRef: React.ref(Js.Nullable.t(Dom.element)),
+      ~search: string,
+      ~countryData: CountryApi.countryData,
+      ~onExit: unit => unit,
+      ~onSelect: Country.t => unit,
+    ) => {
   let CountryApi.{countryList, countryTrie, _} = countryData;
-  let (countries, setCountries) = React.useState(() => countryList);
+  let ({index, countries}, dispatch) = {
+    React.useReducer(reducer, {index: 0, countries: countryList});
+  };
+
+  let onUp = () => dispatch(GoUp);
+  let onDown = () => dispatch(GoDown);
+  let onEsc = () => onExit();
+  let onEnter = () => onSelect(countries[index]);
+  useKeyboardBindings(~onUp, ~onDown, ~onEsc, ~onEnter, inputRef);
 
   // Update countries only when the search is changed.
   let (prevSearch, setPrevSearch) = React.useState(() => search);
   if (search !== prevSearch) {
     setPrevSearch(_ => search);
-    setCountries(_ =>
-      Country.searchCountries(~search, ~countryList, ~countryTrie)
-    );
+    let countries =
+      Country.searchCountries(~search, ~countryList, ~countryTrie);
+    dispatch(SetCountries(countries));
   };
 
   countries
