@@ -29,17 +29,24 @@ let useInputRef = (onExit, dispatch) => {
       | _ => ()
       }
     });
-  React.useEffect(() => {
-    switch (inputRef.current |> Js.Nullable.toOption) {
-    | None => None
-    | Some(inputElement) =>
-      KeyboardFFI.addEventListener(inputElement, "keydown", onKeyDown);
-      Some(
-        () =>
-          KeyboardFFI.removeEventListener(inputElement, "keydown", onKeyDown),
-      );
-    }
-  });
+  React.useEffect1(
+    () => {
+      switch (inputRef.current |> Js.Nullable.toOption) {
+      | None => None
+      | Some(inputElement) =>
+        KeyboardFFI.addEventListener(inputElement, "keydown", onKeyDown);
+        Some(
+          () =>
+            KeyboardFFI.removeEventListener(
+              inputElement,
+              "keydown",
+              onKeyDown,
+            ),
+        );
+      }
+    },
+    [|inputRef|],
+  );
   inputRef;
 };
 
