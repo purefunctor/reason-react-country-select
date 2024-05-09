@@ -17,6 +17,7 @@
 }
 
 .searchInput > input {
+  flex-grow: 1;
   font-family: "Arial", sans-serif;
   color: #333333;
   border: none;
