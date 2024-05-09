@@ -1,3 +1,6 @@
+[@mel.module "./CountrySelect.module.css"]
+external css: Js.t({..}) = "default";
+
 open Models;
 
 type state = {
@@ -67,6 +70,13 @@ let make =
   );
 
   let onClick = _ => dispatch(Toggle);
+  let buttonFlag =
+    switch (current) {
+    | None => ""
+    | Some(current) =>
+      let alpha2 = current.value;
+      {j|fi fi-$alpha2|j};
+    };
   let buttonText =
     switch (current) {
     | None => "Select a Country"
@@ -81,7 +91,15 @@ let make =
   };
 
   <div ?className>
-    <button onClick> {React.string(buttonText)} </button>
+    <button className=css##selectButton onClick>
+      <div className=css##selectButtonInner>
+        <div className=css##selectButtonContent>
+          <span className=buttonFlag />
+          <span> {React.string(buttonText)} </span>
+        </div>
+        <Icons.ArrowDown />
+      </div>
+    </button>
     {toggled ? <CountrySelectSearch onExit onSelect /> : React.null}
   </div>;
 };

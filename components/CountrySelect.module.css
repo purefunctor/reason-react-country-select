@@ -1,0 +1,27 @@
+.selectButton {
+  font-family: "Arial", sans-serif;
+  background-color: #ffffff;
+  color: #333333;
+
+  padding: 4px 10px 4px 10px;
+  border-radius: 3px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 20%);
+}
+
+.selectButton:hover {
+  cursor: pointer;
+  background-color: #e6e6e6;
+}
+
+.selectButtonInner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.selectButtonContent {
+  display: flex;
+  gap: 8px;
+}
