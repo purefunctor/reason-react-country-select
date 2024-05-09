@@ -55,17 +55,16 @@ let make =
   let ({buttonText, isToggled}, dispatch) =
     React.useReducer(reducer, defaultState);
 
-  React.useEffect1(
-    () => {
-      let country = getInitialCountry(~country, ~countriesQuery);
-      switch (country) {
-      | Some(country) => dispatch(SelectCountry(country))
-      | None => ()
-      };
-      None;
-    },
-    [|countriesQuery|],
-  );
+  let (previousQuery, setPreviousQuery) =
+    React.useState(() => countriesQuery);
+  if (countriesQuery !== previousQuery) {
+    setPreviousQuery(_ => countriesQuery);
+    let country = getInitialCountry(~country, ~countriesQuery);
+    switch (country) {
+    | Some(country) => dispatch(SelectCountry(country))
+    | None => ()
+    };
+  };
 
   let onClick = _ => {
     dispatch(ToggleDropdown);
