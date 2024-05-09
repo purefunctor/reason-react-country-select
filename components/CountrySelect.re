@@ -46,21 +46,25 @@ let make =
   let ({current, toggled}, dispatch) =
     React.useReducer(reducer, {current: None, toggled: false});
 
-  let (prevQuery, setPrevQuery) = React.useState(() => countriesQuery);
-  if (countriesQuery !== prevQuery) {
-    setPrevQuery(_ => countriesQuery);
-    switch (countriesQuery) {
-    | Pending
-    | Failed(_) => ()
-    | Finished(countryData) =>
-      let country = getInitialCountry(~country, ~countryData);
-      dispatch(Current(country));
-      switch (country) {
-      | Some(country) => onChange(country)
-      | None => ()
+  // We need useEffect here to prevent `onChange` from modifying
+  // state in the parent while this component is being rendered.
+  React.useEffect1(
+    () => {
+      switch (countriesQuery) {
+      | Pending
+      | Failed(_) => ()
+      | Finished(countryData) =>
+        let country = getInitialCountry(~country, ~countryData);
+        dispatch(Current(country));
+        switch (country) {
+        | Some(country) => onChange(country)
+        | None => ()
+        };
       };
-    };
-  };
+      None;
+    },
+    [|countriesQuery|],
+  );
 
   let onClick = _ => dispatch(Toggle);
   let buttonText =
