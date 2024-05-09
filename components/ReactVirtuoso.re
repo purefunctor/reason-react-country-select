@@ -14,7 +14,8 @@ module Virtuoso = {
       ~style: ReactDOM.style=?,
       ~components: components=?,
       ~totalCount: int,
-      ~itemContent: int => React.element
+      ~itemContent: int => React.element,
+      ~totalListHeightChanged: float => unit=?,
     ) =>
     React.element =
     "Virtuoso";
