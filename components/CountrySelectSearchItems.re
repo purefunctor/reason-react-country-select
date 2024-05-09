@@ -1,3 +1,6 @@
+[@mel.module "./CountrySelectSearchItems.module.css"]
+external css: Js.t({..}) = "default";
+
 open Models;
 
 module Item = {
@@ -15,7 +18,14 @@ module Item = {
   [@react.component]
   let make = (~country: Country.t, ~onSelect) => {
     let onClick = _ => onSelect(country);
-    <div onClick> {React.string(country.label)} </div>;
+
+    let alpha2 = country.value;
+    let countryCss = {j|fi fi-$alpha2|j};
+
+    <div className=css##item onClick>
+      <span className=countryCss />
+      <span> {React.string(country.label)} </span>
+    </div>;
   };
 
   let make = React.memoCustomCompareProps(make, equalProps);

@@ -1,0 +1,13 @@
+.item {
+  font-family: "Arial", sans-serif;
+  color: #333333;
+
+  display: flex;
+  gap: 12px;
+  padding: 4px 10px 4px 10px;
+}
+
+.item:hover {
+  cursor: pointer;
+  background-color: #FFDBB3;
+}
