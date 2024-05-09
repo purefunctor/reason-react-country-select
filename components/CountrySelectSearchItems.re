@@ -135,7 +135,7 @@ let make =
 
   <ReactVirtuoso.Virtuoso
     ref={ReactDOM.Ref.domRef(listRef)}
-    style={ReactDOM.Style.make(~height="400px", ())}
+    style={ReactDOM.Style.make(~height="372px", ())}
     components={header: Header.make, footer: Footer.make}
     totalCount={Js.Array.length(countries)}
     itemContent={index => {
