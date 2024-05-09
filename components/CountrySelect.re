@@ -90,7 +90,13 @@ let make =
     onChange(country);
   };
 
-  <div ?className>
+  let className =
+    switch (className) {
+    | None => css##selectContainer
+    | Some(className) => className ++ " " ++ css##selectContainer
+    };
+
+  <div className>
     <button className=css##selectButton onClick>
       <div className=css##selectButtonInner>
         <div className=css##selectButtonContent>

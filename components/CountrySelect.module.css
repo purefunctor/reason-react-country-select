@@ -1,7 +1,14 @@
+.selectContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
 .selectButton {
   font-family: "Arial", sans-serif;
   background-color: #ffffff;
   color: #333333;
+  width: fit-content;
 
   padding: 4px 10px 4px 10px;
   border-radius: 3px;
