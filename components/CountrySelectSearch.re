@@ -14,7 +14,7 @@ let reducer = (state: state, action: action) => {
   switch (action) {
   | GoUp => {...state, index: state.index - 1}
   | GoDown => {...state, index: state.index + 1}
-  | Search(search) => {...state, search}
+  | Search(search) => {index: 0, search}
   };
 };
 
