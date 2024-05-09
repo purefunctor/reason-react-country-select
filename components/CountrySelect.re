@@ -66,12 +66,10 @@ let make =
     };
   };
 
-  let onClick = _ => {
-    dispatch(ToggleDropdown);
-  };
-
+  let onClick = _ => dispatch(ToggleDropdown);
   let onChange = Option.value(onChange, ~default=_ => ());
 
+  let onExit = _ => dispatch(ToggleDropdown);
   let onSelect = (country: Country.t) => {
     dispatch(SelectCountry(country));
     onChange(country.label);
@@ -79,6 +77,6 @@ let make =
 
   <div ?className>
     <button onClick> {React.string(buttonText)} </button>
-    {isToggled ? <CountrySelectSearch onSelect /> : React.null}
+    {isToggled ? <CountrySelectSearch onExit onSelect /> : React.null}
   </div>;
 };

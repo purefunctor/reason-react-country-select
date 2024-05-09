@@ -18,11 +18,12 @@ let reducer = (state: state, action: action) => {
   };
 };
 
-let useInputRef = dispatch => {
+let useInputRef = (onExit, dispatch) => {
   let inputRef = React.useRef(Js.Nullable.null);
   let onKeyDown =
     React.useCallback0((event: KeyboardFFI.event) => {
       switch (event.key) {
+      | "Escape" => onExit()
       | "ArrowUp" => dispatch(GoUp)
       | "ArrowDown" => dispatch(GoDown)
       | _ => ()
@@ -43,11 +44,11 @@ let useInputRef = dispatch => {
 };
 
 [@react.component]
-let make = (~onSelect) => {
+let make = (~onExit, ~onSelect) => {
   let countriesQuery = CountryApi.useCountriesQuery();
   let ({index, search}, dispatch) =
     React.useReducer(reducer, {index: 0, search: ""});
-  let inputRef = useInputRef(dispatch);
+  let inputRef = useInputRef(onExit, dispatch);
 
   let onChange = event => {
     dispatch(Search(Form.target(event)##value));
