@@ -8,27 +8,20 @@ module Item = {
   };
 };
 
-type state = {
-  index: int,
-  countries: array(Country.t),
-};
+type state = {index: int};
 
 type action =
   | GoUp
-  | GoDown
-  | SetCountries(array(Country.t));
+  | GoDown;
 
-let reducer = (state: state, action: action) =>
+let reducer = (~length: int, state: state, action: action) =>
   switch (action) {
   | GoUp =>
     let minimum = 0;
-    {...state, index: Js.Math.max_int(minimum, state.index - 1)};
+    {index: Js.Math.max_int(minimum, state.index - 1)};
   | GoDown =>
-    let maximum = Js.Array.length(state.countries) - 1;
-    {...state, index: Js.Math.min_int(state.index + 1, maximum)};
-  | SetCountries(countries) =>
-    let index = 0;
-    {index, countries};
+    let maximum = length - 1;
+    {index: Js.Math.min_int(state.index + 1, maximum)};
   };
 
 let useKeyboardBindings =
@@ -72,8 +65,15 @@ let make =
       ~onSelect: Country.t => unit,
     ) => {
   let CountryApi.{countryList, countryTrie, _} = countryData;
-  let ({index, countries}, dispatch) = {
-    React.useReducer(reducer, {index: 0, countries: countryList});
+  let countries =
+    React.useMemo3(
+      () => Country.searchCountries(~search, ~countryList, ~countryTrie),
+      (search, countryList, countryTrie),
+    );
+
+  let length = Js.Array.length(countries);
+  let ({index}, dispatch) = {
+    React.useReducer(reducer(~length), {index: 0});
   };
 
   let onUp = () => dispatch(GoUp);
@@ -81,15 +81,6 @@ let make =
   let onEsc = () => onExit();
   let onEnter = () => onSelect(countries[index]);
   useKeyboardBindings(~onUp, ~onDown, ~onEsc, ~onEnter, inputRef);
-
-  // Update countries only when the search is changed.
-  let (prevSearch, setPrevSearch) = React.useState(() => search);
-  if (search !== prevSearch) {
-    setPrevSearch(_ => search);
-    let countries =
-      Country.searchCountries(~search, ~countryList, ~countryTrie);
-    dispatch(SetCountries(countries));
-  };
 
   countries
   |> Array.mapi((index, country: Country.t) => {
