@@ -21,22 +21,6 @@ module Item = {
   let make = React.memoCustomCompareProps(make, equalProps);
 };
 
-type state = {index: int};
-
-type action =
-  | GoUp
-  | GoDown;
-
-let reducer = (~length: int, state: state, action: action) =>
-  switch (action) {
-  | GoUp =>
-    let minimum = 0;
-    {index: Js.Math.max_int(minimum, state.index - 1)};
-  | GoDown =>
-    let maximum = length - 1;
-    {index: Js.Math.min_int(state.index + 1, maximum)};
-  };
-
 let useKeyboardBindings =
     (
       ~onUp,
@@ -85,22 +69,50 @@ let make =
     );
 
   let length = Js.Array.length(countries);
-  let ({index}, dispatch) = {
-    React.useReducer(reducer(~length), {index: 0});
-  };
+  let listRef = React.useRef(Js.Nullable.null);
+  let (index, setIndex) = React.useState(() => 0);
 
-  let onUp = () => dispatch(GoUp);
-  let onDown = () => dispatch(GoDown);
+  let scrollToIndex =
+    React.useCallback1(
+      index => {
+        switch (listRef.current |> Js.Nullable.toOption) {
+        | None => ()
+        | Some(listRef) =>
+          Obj.magic(listRef)##scrollIntoView({
+            "index": index,
+            "behaviour": "auto",
+          })
+        }
+      },
+      [|listRef|],
+    );
+
+  let onUp = () => {
+    setIndex(prevIndex => {
+      let nextIndex = Js.Math.max_int(0, prevIndex - 1);
+      scrollToIndex(nextIndex);
+      nextIndex;
+    });
+  };
+  let onDown = () => {
+    setIndex(prevIndex => {
+      let nextIndex = Js.Math.min_int(prevIndex + 1, length - 1);
+      scrollToIndex(nextIndex);
+      nextIndex;
+    });
+  };
   let onEsc = () => onExit();
   let onEnter = () => onSelect(countries[index]);
   useKeyboardBindings(~onUp, ~onDown, ~onEsc, ~onEnter, inputRef);
 
-  <div>
-    {countries
-     |> Array.map((country: Country.t) => {
-          let key = country.value;
-          <Item key country onSelect />;
-        })
-     |> React.array}
-  </div>;
+  <ReactVirtuoso.Virtuoso
+    ref={ReactDOM.Ref.domRef(listRef)}
+    style={ReactDOM.Style.make(~height="400px", ())}
+    totalCount={Js.Array.length(countries)}
+    itemContent={index => {
+      let country = countries[index];
+      let key = country.value;
+      <Item key country onSelect />;
+    }}
+  />;
 };
