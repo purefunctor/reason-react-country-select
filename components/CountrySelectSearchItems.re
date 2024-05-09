@@ -66,6 +66,20 @@ let useKeyboardBindings =
   );
 };
 
+module Header = {
+  [@react.component]
+  let make = () => {
+    <div className=css##listHeader />;
+  };
+};
+
+module Footer = {
+  [@react.component]
+  let make = () => {
+    <div className=css##listFooter />;
+  };
+};
+
 [@react.component]
 let make =
     (
@@ -122,6 +136,7 @@ let make =
   <ReactVirtuoso.Virtuoso
     ref={ReactDOM.Ref.domRef(listRef)}
     style={ReactDOM.Style.make(~height="400px", ())}
+    components={header: Header.make, footer: Footer.make}
     totalCount={Js.Array.length(countries)}
     itemContent={index => {
       let country = countries[index];
