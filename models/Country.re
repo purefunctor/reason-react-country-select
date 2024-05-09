@@ -51,14 +51,17 @@ let searchCountries =
       ~countryList: array(t),
       ~countryTrie: Search.Trie.t(int),
     )
-    : array(t) => {
-  let search = search |> Js.String.toLowerCase;
-  let countryIndices = Search.Trie.searchPartial(countryTrie, search);
-  let countries = [||];
-  countryIndices
-  |> Array.iter(countryIndex => {
-       let value = countryList[countryIndex];
-       ignore(Js.Array.push(~value, countries));
-     });
-  countries;
-};
+    : array(t) =>
+  if (search === "") {
+    countryList;
+  } else {
+    let search = search |> Js.String.toLowerCase;
+    let countryIndices = Search.Trie.searchPartial(countryTrie, search);
+    let countries = [||];
+    countryIndices
+    |> Array.iter(countryIndex => {
+         let value = countryList[countryIndex];
+         ignore(Js.Array.push(~value, countries));
+       });
+    countries;
+  };
