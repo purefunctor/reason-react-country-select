@@ -97,8 +97,8 @@ let make =
 
   <div>
     {countries
-     |> Array.mapi((index, country: Country.t) => {
-          let key = string_of_int(index);
+     |> Array.map((country: Country.t) => {
+          let key = country.value;
           <Item key country onSelect />;
         })
      |> React.array}
