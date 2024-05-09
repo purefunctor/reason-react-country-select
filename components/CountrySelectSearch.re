@@ -1,3 +1,6 @@
+[@mel.module "./CountrySelectSearch.module.css"]
+external css: Js.t({..}) = "default";
+
 open React.Event;
 
 [@react.component]
@@ -10,13 +13,16 @@ let make = (~onExit, ~onSelect) => {
     setSearch(_ => Form.target(event)##value);
   };
 
-  <div>
-    <input
-      ref={ReactDOM.Ref.domRef(inputRef)}
-      placeholder="Search"
-      onChange
-      value=search
-    />
+  <div className=css##searchContainer>
+    <div className=css##searchInput>
+      <Icons.Search />
+      <input
+        ref={ReactDOM.Ref.domRef(inputRef)}
+        placeholder="Search"
+        onChange
+        value=search
+      />
+    </div>
     {switch (countriesQuery) {
      | Pending => <div> {React.string("Loading countries...")} </div>
      | Failed(_) => <div> {React.string("Could not load countries!")} </div>
