@@ -31,8 +31,12 @@ let useKeyboardBindings =
     ) => {
   let onKeyDown = (event: KeyboardFFI.event) => {
     switch (event.key) {
-    | "ArrowUp" => onUp()
-    | "ArrowDown" => onDown()
+    | "ArrowUp" =>
+      KeyboardFFI.preventDefault(event);
+      onUp();
+    | "ArrowDown" =>
+      KeyboardFFI.preventDefault(event);
+      onDown();
     | "Escape" => onEsc()
     | "Enter" => onEnter()
     | _ => ()

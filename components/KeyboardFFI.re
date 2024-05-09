@@ -7,3 +7,5 @@ external addEventListener: ('element, string, event => unit) => unit =
 [@mel.send]
 external removeEventListener: ('element, string, event => unit) => unit =
   "removeEventListener";
+
+[@mel.send] external preventDefault: event => unit = "preventDefault";
