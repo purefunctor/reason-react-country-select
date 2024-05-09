@@ -1,11 +1,24 @@
 open Models;
 
 module Item = {
+  let equalProps = (oldProps, newProps) => {
+    let oldCountry: Country.t = oldProps##country;
+    let newCountry: Country.t = newProps##country;
+    let oldOnSelect = oldProps##onSelect;
+    let newOnSelect = oldProps##onSelect;
+
+    oldCountry.value === newCountry.value
+    && oldCountry.label === oldCountry.label
+    && oldOnSelect === newOnSelect;
+  };
+
   [@react.component]
   let make = (~country: Country.t, ~onSelect) => {
     let onClick = _ => onSelect(country);
     <div onClick> {React.string(country.label)} </div>;
   };
+
+  let make = React.memoCustomCompareProps(make, equalProps);
 };
 
 type state = {index: int};
@@ -82,10 +95,12 @@ let make =
   let onEnter = () => onSelect(countries[index]);
   useKeyboardBindings(~onUp, ~onDown, ~onEsc, ~onEnter, inputRef);
 
-  countries
-  |> Array.mapi((index, country: Country.t) => {
-       let key = string_of_int(index);
-       <Item key country onSelect />;
-     })
-  |> React.array;
+  <div>
+    {countries
+     |> Array.mapi((index, country: Country.t) => {
+          let key = string_of_int(index);
+          <Item key country onSelect />;
+        })
+     |> React.array}
+  </div>;
 };
