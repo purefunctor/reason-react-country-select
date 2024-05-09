@@ -1,45 +1,37 @@
 open Models;
 
 type state = {
-  buttonText: string,
-  isToggled: bool,
+  current: option(Country.t),
+  toggled: bool,
 };
 
 type action =
-  | SelectCountry(Country.t)
-  | ToggleDropdown;
+  | Current(option(Country.t))
+  | Toggle;
 
 let reducer = (state: state, action: action) => {
   switch (action) {
-  | SelectCountry(country) => {buttonText: country.label, isToggled: false}
-  | ToggleDropdown => {...state, isToggled: !state.isToggled}
+  | Current(current) => {current, toggled: false}
+  | Toggle => {...state, toggled: !state.toggled}
   };
 };
 
-let defaultState = {buttonText: "Country", isToggled: false};
-
 let getInitialCountry =
-    (~country: option(string), ~countriesQuery: CountryApi.countriesQuery) => {
-  switch (country, countriesQuery: CountryApi.countriesQuery) {
-  | (
-      Some(initialCountry),
-      Finished({countryList, countryValueMap, countryTrie}),
-    ) =>
-    switch (Js.Dict.get(countryValueMap, initialCountry)) {
+    (~country: option(string), ~countryData: CountryApi.countryData) => {
+  let CountryApi.{countryList, countryValueMap, countryTrie} = countryData;
+  switch (country) {
+  | None => None
+  | Some(country) =>
+    switch (Js.Dict.get(countryValueMap, country)) {
     | Some(initialCountryIndex) => Some(countryList[initialCountryIndex])
     | None =>
       let countries =
-        Country.searchCountries(
-          ~search=initialCountry,
-          ~countryList,
-          ~countryTrie,
-        );
+        Country.searchCountries(~search=country, ~countryList, ~countryTrie);
       switch (countries[0]) {
       | country => Some(country)
       | exception _ => None
       };
     }
-  | _ => None
   };
 };
 
@@ -48,35 +40,39 @@ let make =
     (
       ~className: option(string)=?,
       ~country: option(string),
-      ~onChange: option(string => unit)=?,
+      ~onChange: string => unit=_ => (),
     ) => {
   let countriesQuery = CountryApi.useCountriesQuery();
+  let ({current, toggled}, dispatch) =
+    React.useReducer(reducer, {current: None, toggled: false});
 
-  let ({buttonText, isToggled}, dispatch) =
-    React.useReducer(reducer, defaultState);
-
-  let (previousQuery, setPreviousQuery) =
-    React.useState(() => countriesQuery);
-  if (countriesQuery !== previousQuery) {
-    setPreviousQuery(_ => countriesQuery);
-    let country = getInitialCountry(~country, ~countriesQuery);
-    switch (country) {
-    | Some(country) => dispatch(SelectCountry(country))
-    | None => ()
+  let (prevQuery, setPrevQuery) = React.useState(() => countriesQuery);
+  if (countriesQuery !== prevQuery) {
+    setPrevQuery(_ => countriesQuery);
+    switch (countriesQuery) {
+    | Pending
+    | Failed(_) => ()
+    | Finished(countryData) =>
+      dispatch(Current(getInitialCountry(~country, ~countryData)))
     };
   };
 
-  let onClick = _ => dispatch(ToggleDropdown);
-  let onChange = Option.value(onChange, ~default=_ => ());
+  let onClick = _ => dispatch(Toggle);
+  let buttonText =
+    switch (current) {
+    | None => "Select a Country"
+    | Some(current) => current.label
+    };
 
-  let onExit = _ => dispatch(ToggleDropdown);
+  let onExit = _ => dispatch(Toggle);
   let onSelect = (country: Country.t) => {
-    dispatch(SelectCountry(country));
+    dispatch(Toggle);
+    dispatch(Current(Some(country)));
     onChange(country.label);
   };
 
   <div ?className>
     <button onClick> {React.string(buttonText)} </button>
-    {isToggled ? <CountrySelectSearch onExit onSelect /> : React.null}
+    {toggled ? <CountrySelectSearch onExit onSelect /> : React.null}
   </div>;
 };
