@@ -40,7 +40,7 @@ let make =
     (
       ~className: option(string)=?,
       ~country: option(string),
-      ~onChange: string => unit=_ => (),
+      ~onChange: Country.t => unit=_ => (),
     ) => {
   let countriesQuery = CountryApi.useCountriesQuery();
   let ({current, toggled}, dispatch) =
@@ -53,7 +53,12 @@ let make =
     | Pending
     | Failed(_) => ()
     | Finished(countryData) =>
-      dispatch(Current(getInitialCountry(~country, ~countryData)))
+      let country = getInitialCountry(~country, ~countryData);
+      dispatch(Current(country));
+      switch (country) {
+      | Some(country) => onChange(country)
+      | None => ()
+      };
     };
   };
 
@@ -68,7 +73,7 @@ let make =
   let onSelect = (country: Country.t) => {
     dispatch(Toggle);
     dispatch(Current(Some(country)));
-    onChange(country.label);
+    onChange(country);
   };
 
   <div ?className>
