@@ -1,3 +1,7 @@
+.select {
+  display: inline-block;
+}
+
 .selectButton {
   font-family: "Arial", sans-serif;
   background-color: #ffffff;

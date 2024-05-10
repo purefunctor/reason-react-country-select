@@ -3,22 +3,6 @@ external css: Js.t({..}) = "default";
 
 open Models;
 
-type state = {
-  current: option(Country.t),
-  toggled: bool,
-};
-
-type action =
-  | Current(option(Country.t))
-  | Toggle;
-
-let reducer = (state: state, action: action) => {
-  switch (action) {
-  | Current(current) => {current, toggled: false}
-  | Toggle => {...state, toggled: !state.toggled}
-  };
-};
-
 let getInitialCountry =
     (~country: option(string), ~countryData: CountryApi.countryData) => {
   let CountryApi.{countryList, countryValueMap, countryTrie} = countryData;
@@ -38,17 +22,43 @@ let getInitialCountry =
   };
 };
 
-[@react.component]
-let make =
-    (
-      ~className: option(string)=?,
-      ~country: option(string),
-      ~onChange: Country.t => unit=_ => (),
-    ) => {
-  let countriesQuery = CountryApi.useCountriesQuery();
-  let ({current, toggled}, dispatch) =
-    React.useReducer(reducer, {current: None, toggled: false});
+let useClickOutside =
+    (elementRef: React.ref(Js.Nullable.t(Dom.element)), setToggled) => {
+  open EventFFI;
 
+  let onMouseDown =
+    React.useCallback1(
+      (event: Mouse.event) => {
+        let target = event.target;
+        elementRef.current
+        |> Js.toOption
+        |> Option.iter(element =>
+             if (!elementContainsTarget(~element, ~target)) {
+               setToggled(_ => false);
+             }
+           );
+      },
+      [|elementRef|],
+    );
+
+  React.useEffect1(
+    () => {
+      Mouse.addEventListener(document, "mousedown", onMouseDown);
+      Some(
+        () => Mouse.removeEventListener(document, "mousedown", onMouseDown),
+      );
+    },
+    [|elementRef|],
+  );
+};
+
+let useInitialCountry =
+    (
+      ~countriesQuery: CountryApi.countriesQuery,
+      ~country,
+      ~setCurrent,
+      ~onChange,
+    ) => {
   // We need useEffect here to prevent `onChange` from modifying
   // state in the parent while this component is being rendered.
   React.useEffect1(
@@ -57,10 +67,10 @@ let make =
       | Pending
       | Failed(_) => ()
       | Finished(countryData) =>
-        let country = getInitialCountry(~country, ~countryData);
-        dispatch(Current(country));
-        switch (country) {
-        | Some(country) => onChange(country)
+        let initialCountry = getInitialCountry(~country, ~countryData);
+        setCurrent(_ => initialCountry);
+        switch (initialCountry) {
+        | Some(initialCountry) => onChange(initialCountry)
         | None => ()
         };
       };
@@ -68,29 +78,23 @@ let make =
     },
     [|countriesQuery|],
   );
+};
 
-  let onClick = _ => dispatch(Toggle);
-  let buttonFlag =
-    switch (current) {
-    | None => React.null
-    | Some(current) =>
-      let alpha2 = current.value;
-      <Flag className=css##selectButtonFlag alpha2 />;
-    };
-  let buttonText =
-    switch (current) {
-    | None => "Select a Country"
-    | Some(current) => current.label
-    };
-
-  let onExit = _ => dispatch(Toggle);
-  let onSelect = (country: Country.t) => {
-    dispatch(Toggle);
-    dispatch(Current(Some(country)));
-    onChange(country);
-  };
-
-  <div ?className>
+module Button = {
+  [@react.component]
+  let make = (~current: option(Country.t), ~onClick) => {
+    let buttonFlag =
+      switch (current) {
+      | None => React.null
+      | Some(current) =>
+        let alpha2 = current.value;
+        <Flag className=css##selectButtonFlag alpha2 />;
+      };
+    let buttonText =
+      switch (current) {
+      | None => "Select a Country"
+      | Some(current) => current.label
+      };
     <button className=css##selectButton onClick>
       <div className=css##selectButtonInner>
         <div className=css##selectButtonContent>
@@ -99,7 +103,42 @@ let make =
         </div>
         <Icons.ArrowDown />
       </div>
-    </button>
+    </button>;
+  };
+};
+
+[@react.component]
+let make =
+    (
+      ~className: option(string)=?,
+      ~country: option(string),
+      ~onChange: Country.t => unit=_ => (),
+    ) => {
+  let (current, setCurrent) = React.useState(() => None);
+  let (toggled, setToggled) = React.useState(() => false);
+
+  let containerRef = React.useRef(Js.Nullable.null);
+  useClickOutside(containerRef, setToggled);
+
+  let countriesQuery = CountryApi.useCountriesQuery();
+  useInitialCountry(~countriesQuery, ~country, ~setCurrent, ~onChange);
+
+  let onClick = _ => setToggled(prevToggled => !prevToggled);
+  let onExit = _ => setToggled(_ => false);
+  let onSelect = (country: Country.t) => {
+    setToggled(_ => false);
+    setCurrent(_ => Some(country));
+    onChange(country);
+  };
+
+  let className =
+    switch (className) {
+    | None => css##select
+    | Some(className) => css##select ++ " " ++ className
+    };
+
+  <div ref={ReactDOM.Ref.domRef(containerRef)} className>
+    <Button current onClick />
     {toggled ? <CountrySelectSearch onExit onSelect /> : React.null}
   </div>;
 };
