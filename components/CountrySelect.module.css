@@ -32,3 +32,8 @@
   display: flex;
   gap: 8px;
 }
+
+.selectButtonFlag {
+  flex-basis: 14px;
+  flex-shrink: 0;
+}

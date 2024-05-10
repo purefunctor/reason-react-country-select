@@ -18,12 +18,10 @@ module Item = {
   [@react.component]
   let make = (~country: Country.t, ~onSelect) => {
     let onClick = _ => onSelect(country);
-
     let alpha2 = country.value;
-    let countryCss = {j|fi fi-$alpha2|j};
 
     <div className=css##item onClick>
-      <span className=countryCss />
+      <Flag className=css##itemFlag alpha2 />
       <span> {React.string(country.label)} </span>
     </div>;
   };

@@ -72,10 +72,10 @@ let make =
   let onClick = _ => dispatch(Toggle);
   let buttonFlag =
     switch (current) {
-    | None => ""
+    | None => React.null
     | Some(current) =>
       let alpha2 = current.value;
-      {j|fi fi-$alpha2|j};
+      <Flag className=css##selectButtonFlag alpha2 />;
     };
   let buttonText =
     switch (current) {
@@ -100,7 +100,7 @@ let make =
     <button className=css##selectButton onClick>
       <div className=css##selectButtonInner>
         <div className=css##selectButtonContent>
-          <span className=buttonFlag />
+          buttonFlag
           <span> {React.string(buttonText)} </span>
         </div>
         <Icons.ArrowDown />
