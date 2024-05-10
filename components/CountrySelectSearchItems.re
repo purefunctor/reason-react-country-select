@@ -42,13 +42,14 @@ let useKeyboardBindings =
       ~onEnter,
       inputRef: React.ref(Js.Nullable.t(Dom.element)),
     ) => {
-  let onKeyDown = (event: KeyboardFFI.event) => {
+  open EventFFI;
+  let onKeyDown = (event: Keyboard.event) => {
     switch (event.key) {
     | "ArrowUp" =>
-      KeyboardFFI.preventDefault(event);
+      Keyboard.preventDefault(event);
       onUp();
     | "ArrowDown" =>
-      KeyboardFFI.preventDefault(event);
+      Keyboard.preventDefault(event);
       onDown();
     | "Escape" => onEsc()
     | "Enter" => onEnter()
@@ -60,9 +61,10 @@ let useKeyboardBindings =
       switch (inputRef.current |> Js.toOption) {
       | None => None
       | Some(element) =>
-        open KeyboardFFI;
-        addEventListener(element, "keydown", onKeyDown);
-        Some(() => removeEventListener(element, "keydown", onKeyDown));
+        Keyboard.addEventListener(element, "keydown", onKeyDown);
+        Some(
+          () => Keyboard.removeEventListener(element, "keydown", onKeyDown),
+        );
       }
     },
     (inputRef, onKeyDown),
