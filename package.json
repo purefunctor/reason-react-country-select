@@ -8,10 +8,10 @@
   "private": "true",
   "dependencies": {
     "@tanstack/react-query": "^5.35.1",
+    "@tanstack/react-virtual": "^3.5.0",
     "flag-icons": "^7.2.1",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-virtuoso": "^4.7.10"
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^15.2.3",

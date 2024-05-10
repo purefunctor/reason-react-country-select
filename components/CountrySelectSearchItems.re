@@ -98,32 +98,27 @@ let make =
   let listRef = React.useRef(Js.Nullable.null);
   let (index, setIndex) = React.useState(() => 0);
 
-  let scrollToIndex =
-    React.useCallback1(
-      index => {
-        switch (listRef.current |> Js.Nullable.toOption) {
-        | None => ()
-        | Some(listRef) =>
-          Obj.magic(listRef)##scrollIntoView({
-            "index": index,
-            "behaviour": "auto",
-          })
-        }
-      },
-      [|listRef|],
-    );
+  // estimateSize: lineHeight + paddingTop + paddingBottom
+  let virtualizer =
+    ReactVirtual.useVirtualizer({
+      count: length,
+      getScrollElement: () =>
+        listRef.current |> Js.Nullable.toOption |> Option.get,
+      estimateSize: () => 18 + 4 + 4,
+      getItemKey: index => countries[index].label,
+    });
 
   let onUp = () => {
     setIndex(prevIndex => {
       let nextIndex = Js.Math.max_int(0, prevIndex - 1);
-      scrollToIndex(nextIndex);
+      ReactVirtual.scrollToIndex(virtualizer, nextIndex);
       nextIndex;
     });
   };
   let onDown = () => {
     setIndex(prevIndex => {
       let nextIndex = Js.Math.min_int(prevIndex + 1, length - 1);
-      scrollToIndex(nextIndex);
+      ReactVirtual.scrollToIndex(virtualizer, nextIndex);
       nextIndex;
     });
   };
@@ -131,33 +126,7 @@ let make =
   let onEnter = () => onSelect(countries[index]);
   useKeyboardBindings(~onUp, ~onDown, ~onEsc, ~onEnter, inputRef);
 
-  // Given the item height:
-  // lineHeight: 18px
-  // paddingTop: 4px
-  // paddingBottom: 4px
-  // total: 26px
-  //
-  // Given the maximum items:
-  // 26px * 14 items = 364px
-  //
-  // Given the list margins:
-  // 364px + 8px = 372px
-  let maxHeight = "372px";
-  let (height, setHeight) = React.useState(() => maxHeight);
-
-  <ReactVirtuoso.Virtuoso
-    ref={ReactDOM.Ref.domRef(listRef)}
-    style={ReactDOM.Style.make(~height, ~maxHeight, ())}
-    components={header: Header.make, footer: Footer.make}
-    totalCount={Js.Array.length(countries)}
-    itemContent={index => {
-      let country = countries[index];
-      let key = country.value;
-      <Item key country onSelect />;
-    }}
-    totalListHeightChanged={height => {
-      let height = height |> Float.to_int |> Int.add(8);
-      setHeight(_ => string_of_int(height) ++ "px");
-    }}
-  />;
+  let makeItem =
+    React.useCallback1(country => <Item country onSelect />, [|onSelect|]);
+  <CountrySelectSearchItemsVirtual countries virtualizer listRef makeItem />;
 };
