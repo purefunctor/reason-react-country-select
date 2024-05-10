@@ -86,26 +86,34 @@ let useInputNavigation =
     setInputIndex(prevIndex => {
       let nextIndex =
         switch (prevIndex) {
-        | None => hasCountries ? Some(totalCountries - 1) : None
+        | None => hasCountries ? Some((totalCountries - 1, "center")) : None
         | Some(prevIndex) =>
           let isStart = prevIndex === 0;
-          isStart ? None : Some(prevIndex - 1);
+          isStart ? None : Some((prevIndex - 1, "auto"));
         };
-      nextIndex |> Option.iter(ReactVirtual.scrollToIndex(virtualizer));
-      nextIndex;
+      switch (nextIndex) {
+      | None => None
+      | Some((nextIndex, align)) =>
+        ReactVirtual.scrollToIndex(virtualizer, nextIndex, {align: align});
+        Some(nextIndex);
+      };
     });
   };
   let onDown = () => {
     setInputIndex(prevIndex => {
       let nextIndex =
         switch (prevIndex) {
-        | None => hasCountries ? Some(0) : None
+        | None => hasCountries ? Some((0, "center")) : None
         | Some(prevIndex) =>
           let isFinal = prevIndex === totalCountries - 1;
-          isFinal ? None : Some(prevIndex + 1);
+          isFinal ? None : Some((prevIndex + 1, "auto"));
         };
-      nextIndex |> Option.iter(ReactVirtual.scrollToIndex(virtualizer));
-      nextIndex;
+      switch (nextIndex) {
+      | None => None
+      | Some((nextIndex, align)) =>
+        ReactVirtual.scrollToIndex(virtualizer, nextIndex, {align: align});
+        Some(nextIndex);
+      };
     });
   };
   let onEsc = () => onExit();

@@ -24,8 +24,11 @@ external useVirtualizer: options => virtualizer = "useVirtualizer";
 external getVirtualItems: virtualizer => array(virtualItem) =
   "getVirtualItems";
 
+type scrollOptions = {align: string};
+
 [@mel.send]
-external scrollToIndex: (virtualizer, int) => unit = "scrollToIndex";
+external scrollToIndex: (virtualizer, int, scrollOptions) => unit =
+  "scrollToIndex";
 
 [@mel.get]
 external getMeasureElement: virtualizer => ReactDOM.Ref.callbackDomRef =
