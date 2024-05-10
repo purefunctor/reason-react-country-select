@@ -39,7 +39,7 @@ let make =
       ~countries: array(Country.t),
       ~virtualizer: ReactVirtual.virtualizer,
       ~listRef: ReactDOM.Ref.currentDomRef,
-      ~makeItem: Country.t => React.element,
+      ~makeItem: (int, Country.t) => React.element,
     ) => {
   let innerHeight = virtualizer |> ReactVirtual.getTotalSize |> int_of_float;
 
@@ -59,7 +59,7 @@ let make =
                 "ref": measureElement,
                 "key": key,
                 "style": itemStyle(~start),
-                "children": makeItem(countries[virtualItem.index]),
+                "children": makeItem(index, countries[index]),
               },
             );
           })

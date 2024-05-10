@@ -14,7 +14,7 @@
   flex-shrink: 0;
 }
 
-.item:hover {
+.itemSelected, .item:hover {
   cursor: pointer;
   background-color: #FFDBB3;
 }
