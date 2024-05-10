@@ -4,37 +4,34 @@ external css: Js.t({..}) = "default";
 open Models;
 
 module Item = {
-  let equalProps = (oldProps, newProps) => {
-    let oldCountry: Country.t = oldProps##country;
-    let newCountry: Country.t = newProps##country;
-    let oldOnSelect = oldProps##onSelect;
-    let newOnSelect = newProps##onSelect;
-    let oldSelected = oldProps##isSelected;
-    let newSelected = newProps##isSelected;
-
-    oldCountry.value === newCountry.value
-    && oldCountry.label === oldCountry.label
-    && oldOnSelect === newOnSelect
-    && oldSelected === newSelected;
-  };
-
   [@react.component]
-  let make = (~isSelected: bool, ~country: Country.t, ~onSelect) => {
+  let make = (~country: Country.t, ~isSelected, ~onSelect) => {
     let onClick = _ => onSelect(country);
     let alpha2 = country.value;
 
-    let itemCss = ref(css##item);
-    if (isSelected) {
-      itemCss := itemCss^ ++ " " ++ css##itemSelected;
-    };
+    let className =
+      if (isSelected) {
+        css##item ++ " " ++ css##itemSelected;
+      } else {
+        css##item;
+      };
 
-    <div className=itemCss^ onClick>
+    <div className onClick>
       <Flag className=css##itemFlag alpha2 />
       <span> {React.string(country.label)} </span>
     </div>;
   };
 
-  let make = React.memoCustomCompareProps(make, equalProps);
+  let make =
+    React.memoCustomCompareProps(make, (oldProps, newProps) => {
+      Country.equal(oldProps##country, newProps##country)
+      &&
+      oldProps##isSelected ===
+      newProps##isSelected
+      &&
+      oldProps##onSelect ===
+      newProps##onSelect
+    });
 };
 
 let useKeyboardBindings =
@@ -72,18 +69,55 @@ let useKeyboardBindings =
   );
 };
 
-module Header = {
-  [@react.component]
-  let make = () => {
-    <div className=css##listHeader />;
-  };
-};
+let useInputNavigation =
+    (~countries, ~search, ~inputRef, ~virtualizer, ~onExit, ~onSelect) => {
+  let totalCountries = Js.Array.length(countries);
+  let hasCountries = totalCountries > 0;
 
-module Footer = {
-  [@react.component]
-  let make = () => {
-    <div className=css##listFooter />;
+  let (inputIndex, setInputIndex) = React.useState(() => None);
+
+  let (prevSearch, setPrevSearch) = React.useState(() => search);
+  if (search !== prevSearch) {
+    setPrevSearch(_ => search);
+    setInputIndex(_ => None);
   };
+
+  let onUp = () => {
+    setInputIndex(prevIndex => {
+      let nextIndex =
+        switch (prevIndex) {
+        | None => hasCountries ? Some(totalCountries - 1) : None
+        | Some(prevIndex) =>
+          let isStart = prevIndex === 0;
+          isStart ? None : Some(prevIndex - 1);
+        };
+      nextIndex |> Option.iter(ReactVirtual.scrollToIndex(virtualizer));
+      nextIndex;
+    });
+  };
+  let onDown = () => {
+    setInputIndex(prevIndex => {
+      let nextIndex =
+        switch (prevIndex) {
+        | None => hasCountries ? Some(0) : None
+        | Some(prevIndex) =>
+          let isFinal = prevIndex === totalCountries - 1;
+          isFinal ? None : Some(prevIndex + 1);
+        };
+      nextIndex |> Option.iter(ReactVirtual.scrollToIndex(virtualizer));
+      nextIndex;
+    });
+  };
+  let onEsc = () => onExit();
+  let onEnter = () => {
+    switch (inputIndex) {
+    | None => ()
+    | Some(inputIndex) => onSelect(countries[inputIndex])
+    };
+  };
+  useKeyboardBindings(~onUp, ~onDown, ~onEsc, ~onEnter, inputRef);
+
+  inputIndex;
 };
 
 [@react.component]
@@ -102,68 +136,40 @@ let make =
       (search, countryList, countryTrie),
     );
 
-  let length = Js.Array.length(countries);
+  let totalCountries = Js.Array.length(countries);
   let listRef = React.useRef(Js.Nullable.null);
-  let (selected, setSelected) = React.useState(() => None);
-
-  let (prevSearch, setPrevSearch) = React.useState(() => search);
-  if (search !== prevSearch) {
-    setPrevSearch(_ => search);
-    setSelected(_ => None);
-  };
 
   // estimateSize: lineHeight + paddingTop + paddingBottom
   let virtualizer =
     ReactVirtual.useVirtualizer({
-      count: length,
+      count: totalCountries,
       getScrollElement: () =>
         listRef.current |> Js.Nullable.toOption |> Option.get,
       estimateSize: () => 18 + 4 + 4,
       getItemKey: index => countries[index].label,
     });
 
-  let onUp = () => {
-    setSelected(prevSelected => {
-      switch (prevSelected) {
-      | None => None
-      | Some(prevSelected) =>
-        let nextSelected = Js.Math.max_int(0, prevSelected - 1);
-        ReactVirtual.scrollToIndex(virtualizer, nextSelected);
-        Some(nextSelected);
-      }
-    });
-  };
-  let onDown = () => {
-    setSelected(prevSelected => {
-      switch (prevSelected) {
-      | None => length === 0 ? None : Some(0)
-      | Some(prevSelected) =>
-        let nextSelected = Js.Math.min_int(prevSelected + 1, length - 1);
-        ReactVirtual.scrollToIndex(virtualizer, nextSelected);
-        Some(nextSelected);
-      }
-    });
-  };
-  let onEsc = () => onExit();
-  let onEnter = () => {
-    switch (selected) {
-    | None => ()
-    | Some(index) => onSelect(countries[index])
-    };
-  };
-  useKeyboardBindings(~onUp, ~onDown, ~onEsc, ~onEnter, inputRef);
+  let inputIndex =
+    useInputNavigation(
+      ~countries,
+      ~search,
+      ~inputRef,
+      ~virtualizer,
+      ~onExit,
+      ~onSelect,
+    );
 
   let makeItem =
     React.useCallback2(
       (itemIndex, country) => {
         let isSelected =
-          switch (selected) {
+          switch (inputIndex) {
           | None => false
-          | Some(index) => index === itemIndex
+          | Some(inputIndex) => inputIndex === itemIndex
           };
-        <Item isSelected country onSelect />;
+        <Item country isSelected onSelect />;
       },
-      (selected, onSelect),
+      (inputIndex, onSelect),
     );
   <CountrySelectSearchItemsVirtual countries virtualizer listRef makeItem />;
 };

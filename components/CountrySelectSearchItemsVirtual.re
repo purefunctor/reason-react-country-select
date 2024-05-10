@@ -43,7 +43,7 @@ let make =
     ) => {
   let innerHeight = virtualizer |> ReactVirtual.getTotalSize |> int_of_float;
 
-  <div ref={ReactDOM.Ref.domRef(listRef)} style=containerStyle>
+  <div tabIndex=(-1) ref={ReactDOM.Ref.domRef(listRef)} style=containerStyle>
     <div style={innerStyle(~innerHeight)}>
       {ReactVirtual.getVirtualItems(virtualizer)
        |> Array.map((virtualItem: ReactVirtual.virtualItem) => {

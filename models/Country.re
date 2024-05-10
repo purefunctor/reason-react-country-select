@@ -3,6 +3,10 @@ type t = {
   label: string,
 };
 
+let equal = (l: t, r: t) => {
+  l.value === r.value && l.label === r.label;
+};
+
 let getDecodeString = (d: Js.Dict.t(Js.Json.t), k: string): option(string) => {
   Js.Dict.get(d, k)->Option.bind(Js.Json.decodeString);
 };
