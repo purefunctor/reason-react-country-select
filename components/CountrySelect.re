@@ -83,7 +83,10 @@ let useInitialCountry =
 
 module Button = {
   [@react.component]
-  let make = (~current: option(Country.t), ~onClick) => {
+  let make = (~current: option(Country.t), ~setToggled) => {
+    let onClick = _ => {
+      setToggled(prevToggled => !prevToggled);
+    };
     let buttonFlag =
       switch (current) {
       | None => React.null
@@ -124,12 +127,18 @@ let make =
   let countriesQuery = CountryApi.useCountriesQuery();
   useInitialCountry(~countriesQuery, ~country, ~setCurrent, ~onChange);
 
-  let onClick = _ => setToggled(prevToggled => !prevToggled);
-  let onExit = _ => setToggled(_ => false);
-  let onSelect = (country: Country.t) => {
+  let onOptionClick = country => {
     setToggled(_ => false);
     setCurrent(_ => Some(country));
     onChange(country);
+  };
+
+  let onSearchEsc = () => {
+    setToggled(_ => false);
+  };
+
+  let onSearchEnter = country => {
+    onOptionClick(country);
   };
 
   let className =
@@ -139,7 +148,9 @@ let make =
     };
 
   <div ref={ReactDOM.Ref.domRef(containerRef)} className>
-    <Button current onClick />
-    {toggled ? <CountrySelectSearch onExit onSelect /> : React.null}
+    <Button current setToggled />
+    {toggled
+       ? <CountrySelectSearch onOptionClick onSearchEsc onSearchEnter />
+       : React.null}
   </div>;
 };

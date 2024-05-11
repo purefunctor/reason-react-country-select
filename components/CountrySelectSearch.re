@@ -4,7 +4,7 @@ external css: Js.t({..}) = "default";
 open React.Event;
 
 [@react.component]
-let make = (~onExit, ~onSelect) => {
+let make = (~onOptionClick, ~onSearchEsc, ~onSearchEnter) => {
   let countriesQuery = CountryApi.useCountriesQuery();
   let (search, setSearch) = React.useState(() => "");
 
@@ -27,7 +27,14 @@ let make = (~onExit, ~onSelect) => {
      | Pending => <div> {React.string("Loading countries...")} </div>
      | Failed(_) => <div> {React.string("Could not load countries!")} </div>
      | Finished(countryData) =>
-       <CountrySelectSearchItems inputRef search countryData onExit onSelect />
+       <CountrySelectSearchItems
+         inputRef
+         search
+         countryData
+         onOptionClick
+         onSearchEsc
+         onSearchEnter
+       />
      }}
   </div>;
 };

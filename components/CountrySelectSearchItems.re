@@ -5,9 +5,13 @@ open Models;
 
 module Item = {
   [@react.component]
-  let make = (~country: Country.t, ~isSelected, ~onSelect) => {
-    let onClick = _ => onSelect(country);
-    let alpha2 = country.value;
+  let make = (~country: Country.t, ~isSelected, ~onOptionClick) => {
+    let onClick = _ => onOptionClick(country);
+
+    let itemFlag = {
+      let alpha2 = country.value;
+      <Flag className=css##itemFlag alpha2 />;
+    };
 
     let className =
       if (isSelected) {
@@ -17,7 +21,7 @@ module Item = {
       };
 
     <div className onClick>
-      <Flag className=css##itemFlag alpha2 />
+      itemFlag
       <span> {React.string(country.label)} </span>
     </div>;
   };
@@ -29,8 +33,8 @@ module Item = {
       oldProps##isSelected ===
       newProps##isSelected
       &&
-      oldProps##onSelect ===
-      newProps##onSelect
+      oldProps##onOptionClick ===
+      newProps##onOptionClick
     });
 };
 
@@ -51,7 +55,6 @@ let useKeyboardBindings =
       onUp();
     | "ArrowDown" =>
       event |> Keyboard.preventDefault;
-      Js.Console.log("DOWN");
       onDown();
     | "Escape" => onEsc()
     | "Enter" => onEnter()
@@ -74,7 +77,14 @@ let useKeyboardBindings =
 };
 
 let useInputNavigation =
-    (~countries, ~search, ~inputRef, ~virtualizer, ~onExit, ~onSelect) => {
+    (
+      ~countries,
+      ~search,
+      ~inputRef,
+      ~virtualizer,
+      ~onSearchEsc,
+      ~onSearchEnter,
+    ) => {
   let totalCountries = Js.Array.length(countries);
   let hasCountries = totalCountries > 0;
 
@@ -120,11 +130,11 @@ let useInputNavigation =
       };
     });
   };
-  let onEsc = () => onExit();
+  let onEsc = onSearchEsc;
   let onEnter = () => {
     switch (inputIndex) {
     | None => ()
-    | Some(inputIndex) => onSelect(countries[inputIndex])
+    | Some(inputIndex) => onSearchEnter(countries[inputIndex])
     };
   };
   useKeyboardBindings(~onUp, ~onDown, ~onEsc, ~onEnter, inputRef);
@@ -138,8 +148,9 @@ let make =
       ~inputRef: React.ref(Js.Nullable.t(Dom.element)),
       ~search: string,
       ~countryData: CountryApi.countryData,
-      ~onExit: unit => unit,
-      ~onSelect: Country.t => unit,
+      ~onOptionClick: Country.t => unit,
+      ~onSearchEsc: unit => unit,
+      ~onSearchEnter: Country.t => unit,
     ) => {
   let CountryApi.{countryList, countryTrie, _} = countryData;
   let countries =
@@ -167,8 +178,8 @@ let make =
       ~search,
       ~inputRef,
       ~virtualizer,
-      ~onExit,
-      ~onSelect,
+      ~onSearchEsc,
+      ~onSearchEnter,
     );
 
   let makeItem =
@@ -179,9 +190,9 @@ let make =
           | None => false
           | Some(inputIndex) => inputIndex === itemIndex
           };
-        <Item country isSelected onSelect />;
+        <Item country isSelected onOptionClick />;
       },
-      (inputIndex, onSelect),
+      (inputIndex, onOptionClick),
     );
   <CountrySelectSearchItemsVirtual countries virtualizer listRef makeItem />;
 };
