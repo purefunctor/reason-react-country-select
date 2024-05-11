@@ -2,8 +2,12 @@
 external css: Js.t({..}) = "default";
 
 open Models;
+open React.Event;
 
-module Item = {
+module SearchContainer = CountrySelectSearchContainer;
+module SearchItemsVirtual = CountrySelectSearchItemsVirtual;
+
+module SearchItem = {
   [@react.component]
   let make = (~country: Country.t, ~isSelected, ~onOptionClick) => {
     let onClick = _ => onOptionClick(country);
@@ -38,66 +42,21 @@ module Item = {
     });
 };
 
-let useKeyboardBindings =
-    (
-      ~onUp,
-      ~onDown,
-      ~onEsc,
-      ~onEnter,
-      inputRef: React.ref(Js.Nullable.t(Dom.element)),
-    ) => {
-  open WebFFI;
-
-  let onKeyDown = event => {
-    switch (event |> Keyboard.key) {
-    | "ArrowUp" =>
-      event |> Keyboard.preventDefault;
-      onUp();
-    | "ArrowDown" =>
-      event |> Keyboard.preventDefault;
-      onDown();
-    | "Escape" => onEsc()
-    | "Enter" => onEnter()
-    | _ => ()
-    };
-  };
-
-  React.useEffect2(
-    () => {
-      inputRef.current
-      |> Js.toOption
-      |> Option.map(inputEl => {
-           let inputEl = inputEl |> Element.asEventTarget;
-           Keyboard.addEventListener(inputEl, "keydown", onKeyDown);
-           () => Keyboard.removeEventListener(inputEl, "keydown", onKeyDown);
-         })
-    },
-    (inputRef, onKeyDown),
-  );
-};
-
-let useInputNavigation =
-    (
-      ~countries,
-      ~search,
-      ~inputRef,
-      ~virtualizer,
-      ~onSearchEsc,
-      ~onSearchEnter,
-    ) => {
+let useKeyboardNavigation =
+    (~countries, ~search, ~virtualizer, ~onSearchEsc, ~onSearchEnter) => {
   let totalCountries = Js.Array.length(countries);
   let hasCountries = totalCountries > 0;
 
-  let (inputIndex, setInputIndex) = React.useState(() => None);
+  let (searchIndex, setSearchIndex) = React.useState(() => None);
 
   let (prevSearch, setPrevSearch) = React.useState(() => search);
   if (search !== prevSearch) {
     setPrevSearch(_ => search);
-    setInputIndex(_ => None);
+    setSearchIndex(_ => None);
   };
 
   let onUp = () => {
-    setInputIndex(prevIndex => {
+    setSearchIndex(prevIndex => {
       let nextIndex =
         switch (prevIndex) {
         | None => hasCountries ? Some((totalCountries - 1, "center")) : None
@@ -114,7 +73,7 @@ let useInputNavigation =
     });
   };
   let onDown = () => {
-    setInputIndex(prevIndex => {
+    setSearchIndex(prevIndex => {
       let nextIndex =
         switch (prevIndex) {
         | None => hasCountries ? Some((0, "center")) : None
@@ -132,26 +91,36 @@ let useInputNavigation =
   };
   let onEsc = onSearchEsc;
   let onEnter = () => {
-    switch (inputIndex) {
+    switch (searchIndex) {
     | None => ()
-    | Some(inputIndex) => onSearchEnter(countries[inputIndex])
+    | Some(searchIndex) => onSearchEnter(countries[searchIndex])
     };
   };
-  useKeyboardBindings(~onUp, ~onDown, ~onEsc, ~onEnter, inputRef);
+  let onSearchKeyDown = event => {
+    let (callback, hasCallback) =
+      switch (event |> Keyboard.key) {
+      | "ArrowUp" => (onUp, true)
+      | "ArrowDown" => (onDown, true)
+      | "Escape" => (onEsc, true)
+      | "Enter" => (onEnter, true)
+      | _ => ((() => ()), false)
+      };
+    if (hasCallback) {
+      event |> Keyboard.preventDefault;
+    };
+    callback();
+  };
 
-  inputIndex;
+  (searchIndex, onSearchKeyDown);
 };
 
 [@react.component]
-let make =
-    (
-      ~inputRef: React.ref(Js.Nullable.t(Dom.element)),
-      ~search: string,
-      ~countryData: CountryApi.countryData,
-      ~onOptionClick: Country.t => unit,
-      ~onSearchEsc: unit => unit,
-      ~onSearchEnter: Country.t => unit,
-    ) => {
+let make = (~countryData, ~onOptionClick, ~onSearchEsc, ~onSearchEnter) => {
+  let (search, setSearch) = React.useState(() => "");
+  let onSearchChange = event => {
+    setSearch(_ => Form.target(event)##value);
+  };
+
   let CountryApi.{countryList, countryTrie, _} = countryData;
   let countries =
     React.useMemo3(
@@ -172,11 +141,10 @@ let make =
       getItemKey: index => countries[index].label,
     });
 
-  let inputIndex =
-    useInputNavigation(
+  let (searchIndex, onSearchKeyDown) =
+    useKeyboardNavigation(
       ~countries,
       ~search,
-      ~inputRef,
       ~virtualizer,
       ~onSearchEsc,
       ~onSearchEnter,
@@ -186,13 +154,17 @@ let make =
     React.useCallback2(
       (itemIndex, country) => {
         let isSelected =
-          switch (inputIndex) {
+          switch (searchIndex) {
           | None => false
           | Some(inputIndex) => inputIndex === itemIndex
           };
-        <Item country isSelected onOptionClick />;
+        <SearchItem country isSelected onOptionClick />;
       },
-      (inputIndex, onOptionClick),
+      (searchIndex, onOptionClick),
     );
-  <CountrySelectSearchItemsVirtual countries virtualizer listRef makeItem />;
+
+  <SearchContainer
+    onChange=onSearchChange onKeyDown=onSearchKeyDown value=search>
+    <SearchItemsVirtual countries virtualizer listRef makeItem />
+  </SearchContainer>;
 };

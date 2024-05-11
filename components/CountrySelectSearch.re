@@ -1,40 +1,26 @@
 [@mel.module "./CountrySelectSearch.module.css"]
 external css: Js.t({..}) = "default";
 
-open React.Event;
+module SearchContainer = CountrySelectSearchContainer;
+module SearchItems = CountrySelectSearchItems;
 
 [@react.component]
 let make = (~onOptionClick, ~onSearchEsc, ~onSearchEnter) => {
   let countriesQuery = CountryApi.useCountriesQuery();
-  let (search, setSearch) = React.useState(() => "");
-
-  let inputRef = React.useRef(Js.Nullable.null);
-  let onChange = event => {
-    setSearch(_ => Form.target(event)##value);
+  switch (countriesQuery) {
+  | Pending =>
+    <SearchContainer>
+      <div className=css##message>
+        {React.string("Loading countries...")}
+      </div>
+    </SearchContainer>
+  | Failed(_) =>
+    <SearchContainer>
+      <div className=css##message>
+        {React.string("Could not load countries!")}
+      </div>
+    </SearchContainer>
+  | Finished(countryData) =>
+    <SearchItems countryData onOptionClick onSearchEsc onSearchEnter />
   };
-
-  <div className=css##searchContainer>
-    <div className=css##searchInput>
-      <Icons.Search />
-      <input
-        ref={ReactDOM.Ref.domRef(inputRef)}
-        placeholder="Search"
-        onChange
-        value=search
-      />
-    </div>
-    {switch (countriesQuery) {
-     | Pending => <div> {React.string("Loading countries...")} </div>
-     | Failed(_) => <div> {React.string("Could not load countries!")} </div>
-     | Finished(countryData) =>
-       <CountrySelectSearchItems
-         inputRef
-         search
-         countryData
-         onOptionClick
-         onSearchEsc
-         onSearchEnter
-       />
-     }}
-  </div>;
 };
