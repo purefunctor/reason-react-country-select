@@ -43,12 +43,12 @@ jobs:
 
       - name: Install dependencies
         run: 
-          opam install . --deps-only --with-test
+          opam install . --deps-only --with-test && \
           pnpm install
 
       - name: Build project
         run: | 
-          opam exec -- dune build
+          opam exec -- dune build && \
           pnpm vite build
       
       - name: Upload artifact
