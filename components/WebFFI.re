@@ -19,22 +19,6 @@ module HTMLElement = {
   [@mel.send] external focus: t => unit = "focus";
 };
 
-module Keyboard = {
-  type event;
-
-  [@mel.get] external key: event => string = "key";
-  [@mel.send] external preventDefault: event => unit = "preventDefault";
-
-  [@mel.send]
-  external addEventListener: (Dom.eventTarget, string, event => unit) => unit =
-    "addEventListener";
-
-  [@mel.send]
-  external removeEventListener:
-    (Dom.eventTarget, string, event => unit) => unit =
-    "removeEventListener";
-};
-
 module Mouse = {
   type event;
 
