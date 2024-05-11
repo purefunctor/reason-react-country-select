@@ -42,13 +42,13 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: 
-          opam install . --deps-only --with-test && \
+        run: |
+          opam install . --deps-only --with-test
           pnpm install
 
       - name: Build project
-        run: | 
-          opam exec -- dune build && \
+        run: |
+          opam exec -- dune build
           pnpm vite build
       
       - name: Upload artifact
