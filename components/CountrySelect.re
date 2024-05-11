@@ -2,6 +2,7 @@
 external css: Js.t({..}) = "default";
 
 open Models;
+open React.Event;
 
 let getInitialCountry =
     (~country: option(string), ~countryData: CountryApi.countryData) => {
@@ -83,9 +84,17 @@ let useInitialCountry =
 
 module Button = {
   [@react.component]
-  let make = (~current: option(Country.t), ~setToggled) => {
+  let make = (~current: option(Country.t), ~setToggled, ~buttonRef) => {
     let onClick = _ => {
       setToggled(prevToggled => !prevToggled);
+    };
+    let onKeyDown = event => {
+      switch (event |> Keyboard.key) {
+      | "ArrowDown" =>
+        event |> Keyboard.preventDefault;
+        setToggled(_ => true);
+      | _ => ()
+      };
     };
     let buttonFlag =
       switch (current) {
@@ -99,7 +108,11 @@ module Button = {
       | None => "Select a Country"
       | Some(current) => current.label
       };
-    <button className=css##selectButton onClick>
+    <button
+      ref={ReactDOM.Ref.domRef(buttonRef)}
+      className=css##selectButton
+      onClick
+      onKeyDown>
       <div className=css##selectButtonInner>
         <div className=css##selectButtonContent>
           buttonFlag
@@ -121,6 +134,20 @@ let make =
   let (current, setCurrent) = React.useState(() => None);
   let (toggled, setToggled) = React.useState(() => false);
 
+  let buttonRef = React.useRef(Js.Nullable.null);
+  let focusButton =
+    React.useCallback1(
+      () => {
+        buttonRef.current
+        |> Js.toOption
+        |> Option.iter(buttonEl => {
+             WebFFI.(
+               buttonEl |> Element.unsafeAsHtmlElement |> HTMLElement.focus
+             )
+           })
+      },
+      [|buttonRef|],
+    );
   let containerRef = React.useRef(Js.Nullable.null);
   useClickOutside(containerRef, setToggled);
 
@@ -135,10 +162,12 @@ let make =
 
   let onSearchEsc = () => {
     setToggled(_ => false);
+    focusButton();
   };
 
   let onSearchEnter = country => {
     onOptionClick(country);
+    focusButton();
   };
 
   let className =
@@ -148,7 +177,7 @@ let make =
     };
 
   <div ref={ReactDOM.Ref.domRef(containerRef)} className>
-    <Button current setToggled />
+    <Button current setToggled buttonRef />
     {toggled
        ? <CountrySelectSearch onOptionClick onSearchEsc onSearchEnter />
        : React.null}
