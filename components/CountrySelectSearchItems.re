@@ -42,30 +42,32 @@ let useKeyboardBindings =
       ~onEnter,
       inputRef: React.ref(Js.Nullable.t(Dom.element)),
     ) => {
-  open EventFFI;
-  let onKeyDown = (event: Keyboard.event) => {
-    switch (event.key) {
+  open WebFFI;
+
+  let onKeyDown = event => {
+    switch (event |> Keyboard.key) {
     | "ArrowUp" =>
-      Keyboard.preventDefault(event);
+      event |> Keyboard.preventDefault;
       onUp();
     | "ArrowDown" =>
-      Keyboard.preventDefault(event);
+      event |> Keyboard.preventDefault;
+      Js.Console.log("DOWN");
       onDown();
     | "Escape" => onEsc()
     | "Enter" => onEnter()
     | _ => ()
     };
   };
+
   React.useEffect2(
     () => {
-      switch (inputRef.current |> Js.toOption) {
-      | None => None
-      | Some(element) =>
-        Keyboard.addEventListener(element, "keydown", onKeyDown);
-        Some(
-          () => Keyboard.removeEventListener(element, "keydown", onKeyDown),
-        );
-      }
+      inputRef.current
+      |> Js.toOption
+      |> Option.map(inputEl => {
+           let inputEl = inputEl |> Element.asEventTarget;
+           Keyboard.addEventListener(inputEl, "keydown", onKeyDown);
+           () => Keyboard.removeEventListener(inputEl, "keydown", onKeyDown);
+         })
     },
     (inputRef, onKeyDown),
   );

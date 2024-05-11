@@ -24,16 +24,16 @@ let getInitialCountry =
 
 let useClickOutside =
     (elementRef: React.ref(Js.Nullable.t(Dom.element)), setToggled) => {
-  open EventFFI;
+  open WebFFI;
 
   let onMouseDown =
     React.useCallback1(
-      (event: Mouse.event) => {
-        let target = event.target;
+      event => {
+        let child = event |> Mouse.target;
         elementRef.current
         |> Js.toOption
         |> Option.iter(element =>
-             if (!elementContainsTarget(~element, ~target)) {
+             if (!Element.contains(element, ~child)) {
                setToggled(_ => false);
              }
            );
@@ -43,6 +43,7 @@ let useClickOutside =
 
   React.useEffect1(
     () => {
+      let document = document |> Document.asEventTarget;
       Mouse.addEventListener(document, "mousedown", onMouseDown);
       Some(
         () => Mouse.removeEventListener(document, "mousedown", onMouseDown),
