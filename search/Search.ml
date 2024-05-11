@@ -24,7 +24,6 @@ module Trie = struct
   let insert trie key value =
     let node = ref trie.root in
 
-    let key = Js.String.toLowerCase key in
     let length = Js.String.length key in
     for index = 0 to length - 1 do
       let char = Js.String.charAt ~index key in
@@ -43,7 +42,6 @@ module Trie = struct
   let searchExact trie key =
     let node = ref trie.root in
 
-    let key = Js.String.toLowerCase key in
     let length = Js.String.length key in
     try
       for index = 0 to length - 1 do
@@ -70,7 +68,6 @@ module Trie = struct
     let values = [||] in
     let node = ref trie.root in
 
-    let key = Js.String.toLowerCase key in
     let length = Js.String.length key in
     try
       for index = 0 to length - 1 do
