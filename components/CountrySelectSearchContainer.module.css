@@ -21,15 +21,15 @@
 
 .searchInput>input {
   flex-grow: 1;
-  font-family: "Arial", sans-serif;
-  color: #333333;
+  font-family: var(--font-family);
+  color: var(--foreground-color);
   border: none;
   outline: none;
   padding: 0;
 }
 
 .searchInput>input::placeholder {
-  font-family: "Arial", sans-serif;
+  font-family: var(--font-family);
   color: rgba(0, 0, 0);
   opacity: 32%;
 }

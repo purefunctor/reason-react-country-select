@@ -3,9 +3,9 @@
 }
 
 .selectButton {
-  font-family: "Arial", sans-serif;
-  background-color: #ffffff;
-  color: #333333;
+  font-family: var(--font-family);
+  background-color: var(--background-color);
+  color: var(--foreground-color);
   width: fit-content;
 
   padding: 4px 10px 4px 10px;
@@ -17,7 +17,7 @@
 
 .selectButton:hover {
   cursor: pointer;
-  background-color: #e6e6e6;
+  background-color: var(--background-color-10);
 }
 
 .selectButtonInner {
@@ -32,6 +32,6 @@
 }
 
 .selectButtonFlag {
-  flex-basis: 14px;
+  flex-basis: var(--flag-size);
   flex-shrink: 0;
 }

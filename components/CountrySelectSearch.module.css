@@ -1,7 +1,7 @@
 .message {
-  font-family: "Arial", sans-serif;
-  font-size: 14px;
-  color: #333333;
-  line-height: 18px;
+  font-family: var(--font-family);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--foreground-color);
   padding: 8px;
 }
