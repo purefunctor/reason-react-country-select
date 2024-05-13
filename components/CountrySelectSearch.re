@@ -12,7 +12,8 @@ let make = (~onOptionClick, ~onSearchEsc, ~onSearchEnter) => {
 
   let onEmptyKeyDown = event => {
     switch (event |> Keyboard.key) {
-    | "Escape" =>
+    | "Escape"
+    | "Enter" =>
       event |> Keyboard.preventDefault;
       onSearchEsc();
     | _ => ()
@@ -21,13 +22,13 @@ let make = (~onOptionClick, ~onSearchEsc, ~onSearchEnter) => {
 
   switch (countriesQuery) {
   | Pending =>
-    <SearchContainer onKeyDown=onEmptyKeyDown>
+    <SearchContainer onKeyDown=onEmptyKeyDown onClearKeyDown=onEmptyKeyDown>
       <div className=css##message>
         {React.string("Loading countries...")}
       </div>
     </SearchContainer>
   | Failed(_) =>
-    <SearchContainer onKeyDown=onEmptyKeyDown>
+    <SearchContainer onKeyDown=onEmptyKeyDown onClearKeyDown=onEmptyKeyDown>
       <div className=css##message>
         {React.string("Could not load countries!")}
       </div>

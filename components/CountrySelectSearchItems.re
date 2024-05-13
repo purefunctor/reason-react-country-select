@@ -10,7 +10,7 @@ module SearchItemsVirtual = CountrySelectSearchItemsVirtual;
 module SearchItem = {
   [@react.component]
   let make = (~country: Country.t, ~isSelected, ~onOptionClick) => {
-    let onClick = _ => onOptionClick(country);
+    let onClick = _ => onOptionClick(Some(country));
 
     let itemFlag = {
       let alpha2 = country.value;
@@ -91,10 +91,9 @@ let useKeyboardNavigation =
   };
   let onEsc = onSearchEsc;
   let onEnter = () => {
-    switch (searchIndex) {
-    | None => ()
-    | Some(searchIndex) => onSearchEnter(countries[searchIndex])
-    };
+    searchIndex
+    |> Option.map(searchIndex => countries[searchIndex])
+    |> onSearchEnter;
   };
   let onSearchKeyDown = event => {
     let (callback, hasCallback) =
@@ -111,7 +110,19 @@ let useKeyboardNavigation =
     callback();
   };
 
-  (searchIndex, onSearchKeyDown);
+  let onClearKeyDown = event => {
+    switch (event |> Keyboard.key) {
+    | "Escape" =>
+      event |> Keyboard.preventDefault;
+      onSearchEsc();
+    | "Enter" =>
+      event |> Keyboard.preventDefault;
+      onSearchEnter(None);
+    | _ => ()
+    };
+  };
+
+  (searchIndex, onSearchKeyDown, onClearKeyDown);
 };
 
 [@react.component]
@@ -141,7 +152,7 @@ let make = (~countryData, ~onOptionClick, ~onSearchEsc, ~onSearchEnter) => {
       getItemKey: index => countries[index].label,
     });
 
-  let (searchIndex, onSearchKeyDown) =
+  let (searchIndex, onSearchKeyDown, onClearKeyDown) =
     useKeyboardNavigation(
       ~countries,
       ~search,
@@ -149,6 +160,8 @@ let make = (~countryData, ~onOptionClick, ~onSearchEsc, ~onSearchEnter) => {
       ~onSearchEsc,
       ~onSearchEnter,
     );
+
+  let onClearClick = _ => onOptionClick(None);
 
   let makeItem =
     React.useCallback2(
@@ -164,7 +177,11 @@ let make = (~countryData, ~onOptionClick, ~onSearchEsc, ~onSearchEnter) => {
     );
 
   <SearchContainer
-    onChange=onSearchChange onKeyDown=onSearchKeyDown value=search>
+    onChange=onSearchChange
+    onKeyDown=onSearchKeyDown
+    onClearKeyDown
+    onClearClick
+    value=search>
     <SearchItemsVirtual countries virtualizer listRef makeItem />
   </SearchContainer>;
 };

@@ -2,11 +2,26 @@
 external css: Js.t({..}) = "default";
 
 [@react.component]
-let make = (~onChange=?, ~onKeyDown=?, ~value=?, ~children) => {
+let make =
+    (
+      ~onChange=?,
+      ~onKeyDown=?,
+      ~value=?,
+      ~onClearKeyDown=?,
+      ~onClearClick=?,
+      ~children,
+    ) => {
   <div className=css##searchContainer>
     <div className=css##searchInput>
       <Icons.Search />
       <input placeholder="Search" autoFocus=true ?onChange ?onKeyDown ?value />
+      <button
+        tabIndex=0
+        className=css##searchClear
+        onKeyDown=?onClearKeyDown
+        onClick=?onClearClick>
+        <Icons.Close />
+      </button>
     </div>
     children
   </div>;

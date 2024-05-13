@@ -71,10 +71,7 @@ let useInitialCountry =
       | Finished(countryData) =>
         let initialCountry = getInitialCountry(~country, ~countryData);
         setCurrent(_ => initialCountry);
-        switch (initialCountry) {
-        | Some(initialCountry) => onChange(initialCountry)
-        | None => ()
-        };
+        onChange(initialCountry);
       };
       None;
     },
@@ -129,7 +126,7 @@ let make =
     (
       ~className: option(string)=?,
       ~country: option(string),
-      ~onChange: Country.t => unit=_ => (),
+      ~onChange: option(Country.t) => unit=_ => (),
     ) => {
   let (current, setCurrent) = React.useState(() => None);
   let (toggled, setToggled) = React.useState(() => false);
@@ -156,7 +153,7 @@ let make =
 
   let onOptionClick = country => {
     setToggled(_ => false);
-    setCurrent(_ => Some(country));
+    setCurrent(_ => country);
     onChange(country);
   };
 

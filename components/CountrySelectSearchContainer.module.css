@@ -33,3 +33,13 @@
   color: rgba(0, 0, 0);
   opacity: 32%;
 }
+
+.searchClear {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  background-color: var(--background-color);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
