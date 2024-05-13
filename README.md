@@ -4,11 +4,7 @@
 
 ## Demo
 
-
-
-https://github.com/purefunctor/reason-react-country-select/assets/66708316/65bb8f1a-78a3-49b1-9286-8808a3703afa
-
-
+https://github.com/purefunctor/reason-react-country-select/assets/66708316/24530c72-00c3-4f84-8e51-14959d732777
 
 ## Get Started
 
