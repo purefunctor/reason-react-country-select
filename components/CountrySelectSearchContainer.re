@@ -16,6 +16,7 @@ let make =
       <Icons.Search />
       <input placeholder="Search" autoFocus=true ?onChange ?onKeyDown ?value />
       <button
+        title="Clear Selection"
         tabIndex=0
         className=css##searchClear
         onKeyDown=?onClearKeyDown
