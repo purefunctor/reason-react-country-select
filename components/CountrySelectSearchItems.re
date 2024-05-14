@@ -101,9 +101,10 @@ let useKeyboardNavigation =
   };
   let onEsc = onSearchEsc;
   let onEnter = () => {
-    searchIndex
-    |> Option.map(searchIndex => countries[searchIndex])
-    |> onSearchEnter;
+    switch (searchIndex) {
+    | None => ()
+    | Some(searchIndex) => onSearchEnter(Some(countries[searchIndex]))
+    };
   };
   let onSearchKeyDown = event => {
     let (callback, hasCallback) =
