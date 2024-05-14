@@ -1,6 +1,7 @@
 type t = {
   value: string,
   label: string,
+  count: int,
 };
 
 let equal = (l: t, r: t) => {
@@ -11,7 +12,8 @@ let fromJson = (json: Js.Json.t): t => {
   let country = Obj.magic(json);
   let value = country##value;
   let label = country##label;
-  {value, label};
+  let count = country##count;
+  {value, label, count};
 };
 
 let manyFromJson = (json: Js.Json.t): array(t) => {

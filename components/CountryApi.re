@@ -10,7 +10,19 @@ let getJsonFromLinkImpl: string => Js.Promise.t(Js.Json.t) = [%mel.raw
 |}
 ];
 
-let getCountriesJson = () => getJsonFromLinkImpl(countriesJsonLink);
+let getCountriesJson = () => {
+  let ( let* ) = (x, f) => x |> Js.Promise.then_(f);
+  let* json = getJsonFromLinkImpl(countriesJsonLink);
+
+  // FAKE DATA
+  let lcg = LCG.makeLcgRange(50_000, 250_000);
+  let raw: array(Js.t({..})) = Obj.magic(json);
+  raw |> Array.iter(country => {country##count #= lcg()});
+  let json: Js.Json.t = Obj.magic(raw);
+  // FAKE DATA
+
+  Js.Promise.resolve(json);
+};
 
 type countryData = {
   countryList: array(Country.t),
