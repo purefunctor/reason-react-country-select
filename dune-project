@@ -23,6 +23,7 @@
   ocaml 
   dune
   (melange (>= "3.0.0-51"))
+  (melange-fetch (>= "0.1.0"))
   (reason (>= "3.11.0"))
   (reason-react (>= "0.14.0"))
   (reason-react-ppx (>= "0.14.0")))

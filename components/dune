@@ -1,7 +1,8 @@
 (library
  (name components)
- (libraries melange.belt models reason-react)
+ (libraries melange.belt melange-fetch models reason-react)
  (modes melange)
- (melange.runtime_deps (glob_files *.css))
+ (melange.runtime_deps
+  (glob_files *.css))
  (preprocess
   (pps melange.ppx reason-react-ppx)))

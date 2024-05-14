@@ -2,13 +2,11 @@ open Models;
 
 let countriesJsonLink = "https://gist.githubusercontent.com/rusty-key/659db3f4566df459bd59c8a53dc9f71f/raw/4127f9550ef063121c564025f6d27dceeb279623/counties.json";
 
-let getJsonFromLinkImpl: string => Js.Promise.t(Js.Json.t) = [%mel.raw
-  {|
-  (resource) => {
-    return fetch(resource, { method: "GET" }).then(response => response.json());
-  }
-|}
-];
+let getJsonFromLinkImpl: string => Js.Promise.t(Js.Json.t) =
+  url => {
+    Fetch.fetchWithInit(url, Fetch.RequestInit.make(~method_=Fetch.Get, ()))
+    |> Js.Promise.then_(Fetch.Response.json);
+  };
 
 let getCountriesJson = () => {
   let ( let* ) = (x, f) => x |> Js.Promise.then_(f);
