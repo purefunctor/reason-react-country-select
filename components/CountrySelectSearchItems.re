@@ -102,7 +102,10 @@ let useKeyboardNavigation =
   let onEsc = onSearchEsc;
   let onEnter = () => {
     switch (searchIndex) {
-    | None => ()
+    | None =>
+      if (hasCountries) {
+        onSearchEnter(Some(countries[0]));
+      }
     | Some(searchIndex) => onSearchEnter(Some(countries[searchIndex]))
     };
   };

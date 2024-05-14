@@ -28,4 +28,4 @@ $ pnpm dev
 * `Enter`/`Space`/`ArrowDown` - opens the search combobox when the button is focused.
 * `Escape` - closes the search combobox when the input is focused.
 * `ArrowUp`/`ArrowDown` - navigates the listbox when the input is focused.
-* `Enter` - selects the current country in the listbox when the input is focused.
+* `Enter` - selects either the first or highlighted country in the listbox.
