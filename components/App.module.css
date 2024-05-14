@@ -3,9 +3,12 @@
   --background-color: #ffffff;
   --background-color-10: #e6e6e6;
   --foreground-color: #333333;
+  --foreground-color-10: #00000085;
   --flag-size: 14px;
   --font-size: 14px;
   --line-height: 18px;
+  --container-height: 400px;
+  --container-width: 230px;
 }
 
 :global(body) {

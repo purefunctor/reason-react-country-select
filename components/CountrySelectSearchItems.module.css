@@ -5,6 +5,7 @@
   color: var(--foreground-color);
 
   display: flex;
+  align-items: center;
   gap: 8px;
   padding: 4px 10px 4px 10px;
 }
@@ -18,4 +19,13 @@
 .item:hover {
   cursor: pointer;
   background-color: #FFDBB3;
+}
+
+.itemLabel {
+  flex-grow: 1;
+}
+
+.itemCount {
+  color: var(--foreground-color-10);
+  flex-shrink: 0;
 }

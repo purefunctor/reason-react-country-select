@@ -43,6 +43,10 @@ let useCountriesQuery = (): countriesQuery => {
         let ( let* ) = (x, f) => x |> Js.Promise.then_(f);
         let* countriesJson = getCountriesJson();
         let countryList = Country.manyFromJson(countriesJson);
+        countryList
+        |> Array.sort((x: Country.t, y: Country.t) =>
+             Int.compare(y.count, x.count)
+           );
         let countryValueMap = Country.buildValueMap(countryList);
         let countryTrie = Country.buildIndexTrie(countryList);
         Js.Promise.resolve({countryList, countryValueMap, countryTrie});

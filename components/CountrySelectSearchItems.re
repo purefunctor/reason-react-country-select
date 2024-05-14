@@ -7,6 +7,12 @@ open React.Event;
 module SearchContainer = CountrySelectSearchContainer;
 module SearchItemsVirtual = CountrySelectSearchItemsVirtual;
 
+let nf =
+  WebFFI.Intl.NumberFormat.make(
+    "en",
+    {notation: "compact", minimumFractionDigits: 1, maximumFractionDigits: 1},
+  );
+
 module SearchItem = {
   [@react.component]
   let make = (~country: Country.t, ~isSelected, ~onOptionClick) => {
@@ -24,9 +30,13 @@ module SearchItem = {
         css##item;
       };
 
+    let label = country.label;
+    let count = WebFFI.Intl.NumberFormat.format(nf, `int(country.count));
+
     <div className onClick>
       itemFlag
-      <span> {React.string(country.label)} </span>
+      <span className=css##itemLabel> {React.string(label)} </span>
+      <span className=css##itemCount> {React.string(count)} </span>
     </div>;
   };
 
