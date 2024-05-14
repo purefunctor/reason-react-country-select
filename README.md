@@ -4,7 +4,13 @@
 
 ## Demo
 
+### Core Functionality
+
 https://github.com/purefunctor/reason-react-country-select/assets/66708316/6333b5cf-e38a-4712-8db6-24fca0699a43
+
+### Virtual Scrolling
+
+https://github.com/purefunctor/reason-react-country-select/assets/66708316/5634fabe-5c2b-48c6-80c2-2755a01d85ee
 
 ## Get Started
 
