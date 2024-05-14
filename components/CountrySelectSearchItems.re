@@ -61,8 +61,17 @@ let useKeyboardNavigation =
 
   let (prevSearch, setPrevSearch) = React.useState(() => search);
   if (search !== prevSearch) {
+    let emptySearch = search === "";
     setPrevSearch(_ => search);
-    setSearchIndex(_ => None);
+    setSearchIndex(_ =>
+      if (emptySearch) {
+        None;
+      } else if (hasCountries) {
+        Some(0);
+      } else {
+        None;
+      }
+    );
   };
 
   let onUp = () => {
@@ -102,10 +111,7 @@ let useKeyboardNavigation =
   let onEsc = onSearchEsc;
   let onEnter = () => {
     switch (searchIndex) {
-    | None =>
-      if (hasCountries) {
-        onSearchEnter(Some(countries[0]));
-      }
+    | None => ()
     | Some(searchIndex) => onSearchEnter(Some(countries[searchIndex]))
     };
   };
