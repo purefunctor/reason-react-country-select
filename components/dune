@@ -1,6 +1,6 @@
 (library
  (name components)
- (libraries melange.belt melange-fetch models reason-react)
+ (libraries melange.belt melange-fetch melange-webapi models reason-react)
  (modes melange)
  (melange.runtime_deps
   (glob_files *.css))
