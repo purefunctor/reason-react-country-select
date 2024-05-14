@@ -6,7 +6,7 @@
 
 ### Core Functionality
 
-https://github.com/purefunctor/reason-react-country-select/assets/66708316/6333b5cf-e38a-4712-8db6-24fca0699a43
+https://github.com/purefunctor/reason-react-country-select/assets/66708316/81eb9306-d45c-4429-bad7-6023e184927b
 
 ### Virtual Scrolling
 
