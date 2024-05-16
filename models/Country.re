@@ -9,16 +9,15 @@ let equal = (l: t, r: t) => {
 };
 
 let fromJson = (json: Js.Json.t): t => {
-  let country = Obj.magic(json);
-  let value = country##value;
-  let label = country##label;
-  let count = country##count;
-  {value, label, count};
+  Json.Decode.{
+    value: json |> field("value", string),
+    label: json |> field("label", string),
+    count: json |> field("count", int),
+  };
 };
 
 let manyFromJson = (json: Js.Json.t): array(t) => {
-  let countries = Obj.magic(json);
-  Array.map(fromJson, countries);
+  json |> Json.Decode.array(fromJson);
 };
 
 let normalize = {

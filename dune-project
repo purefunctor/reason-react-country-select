@@ -24,6 +24,7 @@
   dune
   (melange (>= "3.0.0-51"))
   (melange-fetch (>= "0.1.0"))
+  (melange-json (>= "1.1.0"))
   (melange-webapi (>= "0.21.0"))
   (reason (>= "3.11.0"))
   (reason-react (>= "0.14.0"))

@@ -1,6 +1,6 @@
 (library
  (name models)
- (libraries melange.js search)
+ (libraries melange.js melange-json search)
  (modes melange)
  (preprocess
   (pps melange.ppx)))

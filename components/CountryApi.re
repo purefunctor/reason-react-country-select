@@ -14,9 +14,14 @@ let getCountriesJson = () => {
 
   // FAKE DATA
   let lcg = LCG.makeLcgRange(50_000, 250_000);
-  let raw: array(Js.t({..})) = Obj.magic(json);
-  raw |> Array.iter(country => {country##count #= lcg()});
-  let json: Js.Json.t = Obj.magic(raw);
+  let raw: array(Js.Dict.t(Js.Json.t)) =
+    json |> Json.Decode.(array(dict(id)));
+  raw
+  |> Array.iter(country => {
+       let count = Json.Encode.(int(lcg()));
+       Js.Dict.set(country, "count", count);
+     });
+  let json = raw |> Json.Encode.(array(Json.Encode.jsonDict));
   // FAKE DATA
 
   Js.Promise.resolve(json);
