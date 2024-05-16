@@ -22,7 +22,7 @@ type queryArguments('data) = {
 // in your context. This is unideal, but this simply mirrors Js.Promise.catch.
 type queryError;
 
-let coerceQueryError: queryError => 'a = Obj.magic;
+external coerceQueryError: queryError => 'a = "%identity";
 
 type queryResult('data) = {
   isPending: bool,
